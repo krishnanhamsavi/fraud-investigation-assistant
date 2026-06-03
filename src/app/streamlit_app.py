@@ -543,22 +543,14 @@ with st.sidebar:
         )
         selected_case = eval_cases[selected_idx]
 
-        # Advanced filters (collapsed by default)
+        # Advanced filters (collapsed by default): search by ID + score range
         with st.expander("Advanced: Search & Filter", expanded=False):
-            col_f1, col_f2 = st.columns(2)
+            search_query = st.text_input(
+                "Search case ID", placeholder="e.g., eval_027",
+                label_visibility="collapsed", key="case_search",
+            )
 
-            with col_f1:
-                search_query = st.text_input("Search case ID", placeholder="e.g., eval_027", label_visibility="collapsed", key="case_search")
-
-            with col_f2:
-                scenario_types = sorted(set(c["scenario_type"] for c in eval_cases))
-                selected_scenarios = st.multiselect(
-                    "Scenario type",
-                    scenario_types,
-                    default=scenario_types,
-                    label_visibility="collapsed",
-                )
-
+            st.markdown('<div style="font-size:11px; color:#7a95b8; margin:8px 0 2px;">Fraud score range</div>', unsafe_allow_html=True)
             min_score, max_score = st.slider(
                 "Score range",
                 min_value=0.0,
@@ -573,27 +565,26 @@ with st.sidebar:
                 c for c in eval_cases
                 if (not search_query or search_query.lower() in c["eval_id"].lower())
                 and (min_score <= c["model_score"] <= max_score)
-                and c["scenario_type"] in selected_scenarios
             ]
 
             if filtered_cases and len(filtered_cases) < len(eval_cases):
                 st.info(f"Showing {len(filtered_cases)} of {len(eval_cases)} cases")
-                # Re-select from filtered cases if user was using filters
-                if search_query or (min_score > 0.0 or max_score < 1.0) or len(selected_scenarios) < len(scenario_types):
-                    filtered_options = []
-                    for c in filtered_cases:
-                        abbrev = SCENARIO_ABBREV.get(c["scenario_type"], "CASE")
-                        score_str = f"{c['model_score']:.3f}"
-                        label = f"[{abbrev} {score_str}]  {c['eval_id'].upper()}"
-                        filtered_options.append(label)
-                    filtered_idx = st.selectbox(
-                        "Filtered cases",
-                        range(len(filtered_options)),
-                        format_func=lambda i: filtered_options[i],
-                        label_visibility="collapsed",
-                        key="filtered_case_select",
-                    )
-                    selected_case = filtered_cases[filtered_idx]
+                filtered_options = []
+                for c in filtered_cases:
+                    abbrev = SCENARIO_ABBREV.get(c["scenario_type"], "CASE")
+                    score_str = f"{c['model_score']:.3f}"
+                    label = f"[{abbrev} {score_str}]  {c['eval_id'].upper()}"
+                    filtered_options.append(label)
+                filtered_idx = st.selectbox(
+                    "Filtered cases",
+                    range(len(filtered_options)),
+                    format_func=lambda i: filtered_options[i],
+                    label_visibility="collapsed",
+                    key="filtered_case_select",
+                )
+                selected_case = filtered_cases[filtered_idx]
+            elif not filtered_cases:
+                st.warning("No cases match these filters.")
     else:
         st.warning("Eval set not found. Run: python scripts/generate_eval_set.py")
         st.stop()
