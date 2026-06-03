@@ -61,10 +61,10 @@ html, body, [class*="css"] { font-family: -apple-system, BlinkMacSystemFont,
 }
 [data-testid="stSidebar"] [data-baseweb="tag"] span { color: #ffffff !important; }
 [data-testid="stSidebar"] [data-baseweb="tag"] svg { fill: #cfe2ff !important; }
-/* Dropdown popover menu */
-[data-baseweb="popover"] [role="listbox"] { background: #1a2e4a !important; }
-[data-baseweb="popover"] [role="option"] { color: #e8edf5 !important; }
-[data-baseweb="popover"] [role="option"]:hover { background: #2d4a6e !important; }
+/* Selectbox dropdown popover (white menu → dark, readable text) */
+[data-baseweb="popover"] [role="listbox"] { background: #ffffff !important; }
+[data-baseweb="popover"] [role="option"] { color: #1a1a2e !important; font-weight: 500; }
+[data-baseweb="popover"] [role="option"]:hover { background: #eaf2ff !important; color: #1a1a2e !important; }
 
 /* Slider track + handle in sidebar */
 [data-testid="stSidebar"] [data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"] { background: #2563a8 !important; }
