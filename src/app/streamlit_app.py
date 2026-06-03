@@ -44,6 +44,31 @@ html, body, [class*="css"] { font-family: -apple-system, BlinkMacSystemFont,
 [data-testid="stSidebar"] .stSelectbox > div > div { background: #1a2e4a; color: #e8edf5; border-color: #2d4a6e; }
 [data-testid="stSidebarNav"] { display: none; }
 
+/* Text input in sidebar */
+[data-testid="stSidebar"] .stTextInput input {
+    background: #1a2e4a !important; color: #e8edf5 !important;
+    border: 1px solid #2d4a6e !important; border-radius: 6px;
+}
+[data-testid="stSidebar"] .stTextInput input::placeholder { color: #6b82a3 !important; }
+
+/* Multiselect: container + selected tags (fixes unreadable red boxes) */
+[data-testid="stSidebar"] [data-baseweb="select"] > div {
+    background: #1a2e4a !important; border-color: #2d4a6e !important;
+}
+[data-testid="stSidebar"] [data-baseweb="tag"] {
+    background: #2563a8 !important; color: #ffffff !important;
+    border-radius: 4px !important; font-size: 11px !important;
+}
+[data-testid="stSidebar"] [data-baseweb="tag"] span { color: #ffffff !important; }
+[data-testid="stSidebar"] [data-baseweb="tag"] svg { fill: #cfe2ff !important; }
+/* Dropdown popover menu */
+[data-baseweb="popover"] [role="listbox"] { background: #1a2e4a !important; }
+[data-baseweb="popover"] [role="option"] { color: #e8edf5 !important; }
+[data-baseweb="popover"] [role="option"]:hover { background: #2d4a6e !important; }
+
+/* Slider track + handle in sidebar */
+[data-testid="stSidebar"] [data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"] { background: #2563a8 !important; }
+
 /* ── Cards ─────────────────────────────── */
 .card {
     background: white;
