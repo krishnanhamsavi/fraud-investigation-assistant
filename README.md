@@ -84,29 +84,7 @@ This system investigates suspicious transactions by:
 
 ---
 
-## Features
 
-**User Experience**
-- 📊 Interactive case selector (30 real transactions, advanced filters hidden by default)
-- 🔍 SHAP visualization with Plain English summaries
-- 🤖 AI investigation narratives with supporting evidence
-- ✅ Color-coded guardrail status badges
-- 🔄 "What If" mode: adjust amount/timing, see estimated risk change
-- 💡 Inline guidance explaining every section
-
-**Model Risk Governance**
-- ✓ SR 11-7 compliant (model documentation, validation, governance)
-- ✓ GenAI extended governance (prompt versioning, guardrails, monitoring)
-- ✓ Human-in-the-loop (all decisions reviewed by analysts)
-- ✓ PII protection (no card numbers/SSNs in agent output)
-- ✓ ECOA reason codes for adverse actions
-
-**Code Quality**
-- Time-based train/val split preventing temporal leakage
-- OrdinalEncoder fit on train only (no data leakage)
-- Caching for fast iteration (model loads once)
-- Error handling + graceful degradation
-- Type hints throughout
 
 ---
 
@@ -244,28 +222,12 @@ fraud-agent-mrm/
 
 ---
 
-## For Portfolio / LinkedIn
 
-**Key talking points:**
-- "Built an end-to-end fraud detection system combining ML + GenAI + governance"
-- "Demonstrates SR 11-7 compliance extended to LLMs"
-- "97% guardrail pass rate — automated safety checks catch hallucinations"
-- "Human-in-the-loop design: AI is decision *support*, not decision *maker*"
-- "0.851 Cohen's kappa on action recommendations"
 
 **Live demo:** [Deployed link here]
 
 ---
 
-## Contributing
-
-This is a portfolio project. Feedback welcome! Open an issue or PR.
-
----
-
-## License
-
-MIT
 
 ---
 
