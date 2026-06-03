@@ -545,12 +545,15 @@ with st.sidebar:
 
         # Advanced filters (collapsed by default): search by ID + score range
         with st.expander("Advanced: Search & Filter", expanded=False):
+            st.markdown('<div style="font-size:12px; color:#b0bcc8; margin-bottom:10px; line-height:1.5;">Narrow the 30 cases by typing part of a case ID, or drag the slider to a fraud-score band. A filtered dropdown appears below.</div>', unsafe_allow_html=True)
+
+            st.markdown('<div style="font-size:11px; color:#7a95b8; margin:2px 0 2px;">Search by case ID (eval_001 – eval_030)</div>', unsafe_allow_html=True)
             search_query = st.text_input(
                 "Search case ID", placeholder="e.g., eval_027",
                 label_visibility="collapsed", key="case_search",
             )
 
-            st.markdown('<div style="font-size:11px; color:#7a95b8; margin:8px 0 2px;">Fraud score range</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:11px; color:#7a95b8; margin:10px 0 2px;">Fraud score range (0.00 = safe, 1.00 = certain fraud)</div>', unsafe_allow_html=True)
             min_score, max_score = st.slider(
                 "Score range",
                 min_value=0.0,
