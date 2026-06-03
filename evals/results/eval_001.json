@@ -6,7 +6,7 @@
     "risk_assessment": "high",
     "recommended_action": "auto_decline",
     "priority_score": 9,
-    "sar_narrative": "Transaction 3542954, a Product CD 'C' debit Mastercard charge of $22.99, received a near-maximum fraud model score of 0.9979 (get_transaction_details), indicating extremely elevated model confidence in fraudulent activity. The SHAP explanation (get_shap_explanation) identified six features all increasing fraud risk, led by V258 (SHAP +1.488, reason R12: aggregate behavioral risk elevated) and C1 (SHAP +1.101, reason R02: high transaction velocity/frequency). Customer history data (get_customer_history) reveals an anomalous 545 transactions totaling $18,848 on this card in the past 30 days, corroborating the velocity signals identified by the model. Address fields addr1, addr2, and dist1 were all null (get_transaction_details), indicating an absence of location/identity verification data that further elevates concern.",
+    "sar_narrative": "Transaction 3542954, a Product CD 'C' debit Mastercard charge of $22.99, received a near-maximum fraud model score of 0.9979, indicating extremely elevated model confidence in fraudulent activity. The SHAP explanation identified six features all increasing fraud risk, led by V258 (SHAP +1.488, reason R12: aggregate behavioral risk elevated) and C1 (SHAP +1.101, reason R02: high transaction velocity/frequency). Customer history data reveals an anomalous 545 transactions totaling $18,848 on this card in the past 30 days, corroborating the velocity signals identified by the model. Address fields addr1, addr2, and dist1 were all null, indicating an absence of location/identity verification data that further elevates concern.",
     "adverse_action_reason_codes": [
       "R12",
       "R02"

@@ -1005,7 +1005,8 @@ with col_right:
         st.markdown(f'<div class="card"><div class="card-title">Quick Summary</div><div style="font-size:13px; color:#2c3e50; line-height:1.6;">{plain_summary}</div></div>', unsafe_allow_html=True)
 
         # ── SAR narrative ────────────────────────────────────────────────────
-        st.markdown('<div class="card"><div class="card-title">SAR Narrative</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card"><div class="card-title">Investigation Narrative</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:12px; color:#666; margin-bottom:10px;">Model-explainability investigation report. Cites SHAP drivers and reason codes for auditability — an internal analyst document, not a filed regulatory SAR.</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="sar-box">{narrative}</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
