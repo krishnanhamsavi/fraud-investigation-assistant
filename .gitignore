@@ -1,0 +1,58 @@
+# Data — never commit raw Kaggle files or processed artifacts
+data/raw/
+data/processed/
+
+# Kaggle download artifacts in project root
+ieee-fraud-detection/
+ieee-fraud-detection.zip
+
+# Secrets
+.env
+
+# Model artifacts
+*.pkl
+*.joblib
+mlruns/
+models/
+
+# Generated result artifacts (plots, metrics) — reproduced by running notebooks
+docs/results/*.png
+docs/results/*.json
+data/processed/shap_values.npy
+data/processed/shap_X_sample.parquet
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# Ruff / coverage
+.ruff_cache/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Streamlit
+.streamlit/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Eval results (generated, not committed)
+evals/results/*.json
+evals/results/*.jsonl
