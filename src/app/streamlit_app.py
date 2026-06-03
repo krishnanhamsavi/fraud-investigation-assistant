@@ -543,17 +543,11 @@ with st.sidebar:
         )
         selected_case = eval_cases[selected_idx]
 
-        # Advanced filters (collapsed by default): search by ID + score range
-        with st.expander("Advanced: Search & Filter", expanded=False):
-            st.markdown('<div style="font-size:12px; color:#b0bcc8; margin-bottom:10px; line-height:1.5;">Narrow the 30 cases by typing part of a case ID, or drag the slider to a fraud-score band. A filtered dropdown appears below.</div>', unsafe_allow_html=True)
+        # Advanced filter (collapsed by default): score range narrows the dropdown
+        with st.expander("Advanced: Filter by score", expanded=False):
+            st.markdown('<div style="font-size:12px; color:#b0bcc8; margin-bottom:10px; line-height:1.5;">Drag the slider to a fraud-score band — the dropdown below updates to only those cases. (Tip: you can type in any dropdown to search it.)</div>', unsafe_allow_html=True)
 
-            st.markdown('<div style="font-size:11px; color:#7a95b8; margin:2px 0 2px;">Search by case ID (eval_001 – eval_030)</div>', unsafe_allow_html=True)
-            search_query = st.text_input(
-                "Search case ID", placeholder="e.g., eval_027",
-                label_visibility="collapsed", key="case_search",
-            )
-
-            st.markdown('<div style="font-size:11px; color:#7a95b8; margin:10px 0 2px;">Fraud score range (0.00 = safe, 1.00 = certain fraud)</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:11px; color:#7a95b8; margin:2px 0 2px;">Fraud score range (0.00 = safe, 1.00 = certain fraud)</div>', unsafe_allow_html=True)
             min_score, max_score = st.slider(
                 "Score range",
                 min_value=0.0,
@@ -563,15 +557,14 @@ with st.sidebar:
                 label_visibility="collapsed",
             )
 
-            # Apply filters
+            # Apply filter
             filtered_cases = [
                 c for c in eval_cases
-                if (not search_query or search_query.lower() in c["eval_id"].lower())
-                and (min_score <= c["model_score"] <= max_score)
+                if min_score <= c["model_score"] <= max_score
             ]
 
             if filtered_cases and len(filtered_cases) < len(eval_cases):
-                st.info(f"Showing {len(filtered_cases)} of {len(eval_cases)} cases")
+                st.markdown(f'<div style="font-size:11px; color:#7a95b8; margin:8px 0 2px;">{len(filtered_cases)} of {len(eval_cases)} cases in range — pick one:</div>', unsafe_allow_html=True)
                 filtered_options = []
                 for c in filtered_cases:
                     abbrev = SCENARIO_ABBREV.get(c["scenario_type"], "CASE")
@@ -587,7 +580,7 @@ with st.sidebar:
                 )
                 selected_case = filtered_cases[filtered_idx]
             elif not filtered_cases:
-                st.warning("No cases match these filters.")
+                st.warning("No cases in this score range.")
     else:
         st.warning("Eval set not found. Run: python scripts/generate_eval_set.py")
         st.stop()
