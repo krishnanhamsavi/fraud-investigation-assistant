@@ -1,0 +1,268 @@
+{
+  "eval_id": "eval_022",
+  "transaction_id": 3462262,
+  "output": {
+    "transaction_id": 3462262,
+    "risk_assessment": "medium",
+    "recommended_action": "escalate",
+    "priority_score": 7,
+    "sar_narrative": "Transaction 3462262 for $644.00 on a Mastercard debit card (card1: 15093) received a model fraud score of 0.627 per get_transaction_details, placing it in the medium-risk band. The top two SHAP contributors from get_shap_explanation are feature C14 (SHAP +0.668, 'high transaction velocity or frequency') and TransactionAmt (SHAP +0.636, 'unusual amount relative to account history'), both significantly increasing fraud probability. However, get_customer_history indicates that over the prior 30 days this card conducted 14 transactions with a mean amount of $488.48 and a maximum of $1,527.95, suggesting the $644.00 amount is not wholly outside the card's behavioral range, though the velocity signal (C14) remains unexplained by available history. A further anomaly is that the purchaser email domain (aol.com, per get_transaction_details) does not appear in the card's 30-day domain history of yahoo.com and gmail.com (per get_customer_history), warranting human analyst review.",
+    "adverse_action_reason_codes": [
+      "R02",
+      "R01"
+    ],
+    "supporting_evidence": [
+      {
+        "claim": "Model fraud score is 0.627, placing the transaction in the medium-risk band.",
+        "source": "get_transaction_details",
+        "value": "fraud_score: 0.627"
+      },
+      {
+        "claim": "Feature C14 is the top SHAP driver, with a positive contribution of +0.668 log-odds, indicating elevated transaction velocity or frequency.",
+        "source": "get_shap_explanation",
+        "value": "rank 1 \u2014 feature: C14, feature_value: 0.0, shap_value: 0.66809, direction: increases_risk"
+      },
+      {
+        "claim": "TransactionAmt of $644.00 is the second-ranked SHAP driver (+0.636), flagged as unusual relative to account history.",
+        "source": "get_shap_explanation",
+        "value": "rank 2 \u2014 feature: TransactionAmt, feature_value: 644.0, shap_value: 0.6359, direction: increases_risk"
+      },
+      {
+        "claim": "P_emaildomain (aol.com) and card6 (debit) are top SHAP features that decrease fraud probability, introducing a counterintuitive tension with the overall elevated score.",
+        "source": "get_shap_explanation",
+        "value": "rank 4 \u2014 P_emaildomain shap_value: -0.22808 (decreases_risk); rank 5 \u2014 card6 shap_value: -0.19152 (decreases_risk)"
+      },
+      {
+        "claim": "The transaction amount of $644.00 is above the card's 30-day mean of $488.48 but within the observed range ($87.95\u2013$1,527.95), partially mitigating the unusual-amount signal.",
+        "source": "get_customer_history",
+        "value": "mean_amount: 488.48, min_amount: 87.95, max_amount: 1527.95"
+      },
+      {
+        "claim": "The purchaser email domain (aol.com) does not appear in the card's 30-day email domain history, which shows only yahoo.com and gmail.com.",
+        "source": "get_customer_history",
+        "value": "unique_email_domains: [\"yahoo.com\", \"gmail.com\"]"
+      },
+      {
+        "claim": "The transaction hour (~1.31, early morning) appears consistent with the card's established active hours.",
+        "source": "get_customer_history",
+        "value": "hours_active: [1, 2, 3, 10, 11, 13, 15, 16, 21, 22]"
+      },
+      {
+        "claim": "Product code W is consistent with this card's exclusive 30-day product usage history.",
+        "source": "get_customer_history",
+        "value": "unique_products: [\"W\"]"
+      },
+      {
+        "claim": "ECOA adverse action codes R02 and R01 are confirmed as the primary reason codes for this transaction.",
+        "source": "get_reason_codes",
+        "value": "adverse_action_codes: [{code: R02, driven_by_feature: C14}, {code: R01, driven_by_feature: TransactionAmt}]"
+      }
+    ]
+  },
+  "guardrails": {
+    "schema_validation": {
+      "passed": true,
+      "message": "Schema valid",
+      "details": {
+        "issues": []
+      }
+    },
+    "shap_consistency": {
+      "passed": true,
+      "message": "SHAP grounding verified",
+      "details": {
+        "top_shap_features": [
+          "c13",
+          "c14",
+          "card6",
+          "p_emaildomain",
+          "transactionamt",
+          "transactiondt"
+        ],
+        "features_cited_in_narrative": [
+          "p_emaildomain",
+          "transactionamt",
+          "card6",
+          "c14"
+        ],
+        "potentially_hallucinated_features": [],
+        "shap_sourced_in_evidence": true
+      }
+    },
+    "pii_leakage": {
+      "passed": true,
+      "message": "No PII patterns detected",
+      "details": {
+        "findings": []
+      }
+    },
+    "action_consistency": {
+      "passed": true,
+      "message": "Action consistency verified",
+      "details": {
+        "hard_violations": [],
+        "warnings": [],
+        "action": "escalate",
+        "risk": "medium",
+        "n_reason_codes": 2
+      }
+    }
+  },
+  "tool_call_log": [
+    {
+      "iteration": 1,
+      "tool": "get_transaction_details",
+      "input": {
+        "transaction_id": 3462262
+      },
+      "output": {
+        "TransactionID": "3462262",
+        "TransactionAmt": 644.0,
+        "TransactionDT": "12273508",
+        "ProductCD": "W",
+        "card1": "15093",
+        "card4": "mastercard",
+        "card6": "debit",
+        "P_emaildomain": "aol.com",
+        "R_emaildomain": null,
+        "addr1": 181.0,
+        "addr2": 87.0,
+        "dist1": null,
+        "tx_hour": 1.3078,
+        "tx_dayofweek": "2",
+        "M1": null,
+        "M4": "M0",
+        "M5": "F",
+        "M6": "F",
+        "fraud_score": 0.627
+      }
+    },
+    {
+      "iteration": 1,
+      "tool": "get_shap_explanation",
+      "input": {
+        "transaction_id": 3462262
+      },
+      "output": {
+        "transaction_id": 3462262,
+        "top_shap_features": [
+          {
+            "rank": 1,
+            "feature": "C14",
+            "feature_value": 0.0,
+            "shap_value": 0.66809,
+            "direction": "increases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          },
+          {
+            "rank": 2,
+            "feature": "TransactionAmt",
+            "feature_value": 644.0,
+            "shap_value": 0.6359,
+            "direction": "increases_risk",
+            "reason_code": "R01",
+            "reason_text": "Unusual transaction amount relative to account history"
+          },
+          {
+            "rank": 3,
+            "feature": "C13",
+            "feature_value": 0.0,
+            "shap_value": 0.26528,
+            "direction": "increases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          },
+          {
+            "rank": 4,
+            "feature": "P_emaildomain",
+            "feature_value": 2.0,
+            "shap_value": -0.22808,
+            "direction": "decreases_risk",
+            "reason_code": "R03",
+            "reason_text": "Email domain associated with elevated fraud risk"
+          },
+          {
+            "rank": 5,
+            "feature": "card6",
+            "feature_value": 2.0,
+            "shap_value": -0.19152,
+            "direction": "decreases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          },
+          {
+            "rank": 6,
+            "feature": "TransactionDT",
+            "feature_value": 12273508.0,
+            "shap_value": 0.16316,
+            "direction": "increases_risk",
+            "reason_code": "R12",
+            "reason_text": "Aggregate risk score across behavioral dimensions elevated"
+          }
+        ],
+        "note": "shap_value > 0 increases fraud probability; shap_value < 0 decreases it. Values are in log-odds space."
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_customer_history",
+      "input": {
+        "card_id": 15093
+      },
+      "output": {
+        "card_id": 15093,
+        "lookback_days": 30,
+        "n_transactions_in_window": 14,
+        "total_amount": 6838.7,
+        "mean_amount": 488.48,
+        "max_amount": 1527.95,
+        "min_amount": 87.95,
+        "unique_products": [
+          "W"
+        ],
+        "unique_email_domains": [
+          "yahoo.com",
+          "gmail.com"
+        ],
+        "hours_active": [
+          1,
+          2,
+          3,
+          10,
+          11,
+          13,
+          15,
+          16,
+          21,
+          22
+        ]
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_reason_codes",
+      "input": {
+        "transaction_id": 3462262
+      },
+      "output": {
+        "transaction_id": 3462262,
+        "adverse_action_codes": [
+          {
+            "code": "R02",
+            "description": "High transaction velocity or frequency on this card",
+            "driven_by_feature": "C14"
+          },
+          {
+            "code": "R01",
+            "description": "Unusual transaction amount relative to account history",
+            "driven_by_feature": "TransactionAmt"
+          }
+        ],
+        "note": "Codes reflect features that increase fraud probability (positive SHAP only)."
+      }
+    }
+  ],
+  "iterations_used": 3,
+  "error": null
+}

@@ -1,0 +1,64 @@
+{
+  "model": "champion_xgboost",
+  "timestamp": "2026-06-02T18:18:36.977528+00:00",
+  "best_iteration": 475,
+  "n_features": 436,
+  "val_rows": 118108,
+  "val_fraud_rate": 0.0344,
+  "val_metrics": {
+    "roc_auc": 0.9126,
+    "pr_auc": 0.5291,
+    "fdr_at_3pct_review": 0.4783,
+    "fdr_at_5pct_review": 0.581
+  },
+  "threshold_table": [
+    {
+      "review_rate_pct": 0.5,
+      "threshold": 0.9931,
+      "n_reviewed": 590,
+      "fraud_caught": 544,
+      "fdr": 0.1339,
+      "precision": 0.922
+    },
+    {
+      "review_rate_pct": 1.0,
+      "threshold": 0.9668,
+      "n_reviewed": 1181,
+      "fraud_caught": 1038,
+      "fdr": 0.2554,
+      "precision": 0.8789
+    },
+    {
+      "review_rate_pct": 2.0,
+      "threshold": 0.8634,
+      "n_reviewed": 2362,
+      "fraud_caught": 1613,
+      "fdr": 0.3969,
+      "precision": 0.6829
+    },
+    {
+      "review_rate_pct": 3.0,
+      "threshold": 0.7901,
+      "n_reviewed": 3543,
+      "fraud_caught": 1944,
+      "fdr": 0.4783,
+      "precision": 0.5487
+    },
+    {
+      "review_rate_pct": 5.0,
+      "threshold": 0.6771,
+      "n_reviewed": 5905,
+      "fraud_caught": 2361,
+      "fdr": 0.581,
+      "precision": 0.3998
+    },
+    {
+      "review_rate_pct": 10.0,
+      "threshold": 0.4967,
+      "n_reviewed": 11810,
+      "fraud_caught": 2917,
+      "fdr": 0.7178,
+      "precision": 0.247
+    }
+  ]
+}

@@ -1,0 +1,241 @@
+{
+  "eval_id": "eval_017",
+  "transaction_id": 3475902,
+  "output": {
+    "transaction_id": 3475902,
+    "risk_assessment": "low",
+    "recommended_action": "auto_approve",
+    "priority_score": 1,
+    "sar_narrative": "get_transaction_details returned a fraud_score of 0.0174 for a $131.00 Product W debit card transaction occurring at hour 14.75, well below the low-risk threshold of 0.40. get_shap_explanation shows all six top SHAP features carry negative contributions (range: \u22120.22 to \u22120.42 in log-odds), indicating the model's top drivers are collectively reducing \u2014 not elevating \u2014 fraud probability. get_customer_history for card1 13443 over 30 days shows 4 prior transactions with a mean amount of $128.75, consistent product code (W), and overlapping active hours (11, 12, 14, 22), suggesting the flagged transaction fits the card's established behavioral pattern. get_reason_codes returned an empty adverse_action_codes list, corroborating the low-risk classification.",
+    "adverse_action_reason_codes": [],
+    "supporting_evidence": [
+      {
+        "claim": "The model fraud score is very low at 0.0174, below the 0.40 medium-risk threshold.",
+        "source": "get_transaction_details",
+        "value": "fraud_score: 0.0174"
+      },
+      {
+        "claim": "The transaction amount of $131.00 is consistent with the card's recent spending range.",
+        "source": "get_transaction_details",
+        "value": "TransactionAmt: 131.0"
+      },
+      {
+        "claim": "All top 6 SHAP features decrease fraud probability; the highest-magnitude contributor (card2) has a SHAP value of \u22120.4215.",
+        "source": "get_shap_explanation",
+        "value": "top_shap_features rank 1\u20136 all have direction: decreases_risk; shap values: \u22120.4215, \u22120.40857, \u22120.32963, \u22120.28416, \u22120.25279, \u22120.22035"
+      },
+      {
+        "claim": "The P_emaildomain feature is flagged with reason text 'Email domain associated with elevated fraud risk,' yet its SHAP value is \u22120.22035 (decreases risk) \u2014 a tension noted without resolution.",
+        "source": "get_shap_explanation",
+        "value": "feature: P_emaildomain, feature_value: 1.0, shap_value: \u22120.22035, direction: decreases_risk, reason_text: Email domain associated with elevated fraud risk"
+      },
+      {
+        "claim": "The transaction amount ($131.00) falls within the card's 30-day historical range of $80\u2013$171, with a mean of $128.75.",
+        "source": "get_customer_history",
+        "value": "mean_amount: 128.75, min_amount: 80.0, max_amount: 171.0"
+      },
+      {
+        "claim": "The transaction's product code (W) and email domain (anonymous.com) match exclusively observed values in the card's 30-day history.",
+        "source": "get_customer_history",
+        "value": "unique_products: ['W'], unique_email_domains: ['anonymous.com']"
+      },
+      {
+        "claim": "The transaction hour (14.75 \u2248 2 PM) is consistent with the card's known active hours in the past 30 days.",
+        "source": "get_customer_history",
+        "value": "hours_active: [11, 12, 14, 22]"
+      },
+      {
+        "claim": "No adverse action reason codes were returned, consistent with the low fraud score and all-negative SHAP profile.",
+        "source": "get_reason_codes",
+        "value": "adverse_action_codes: []"
+      }
+    ]
+  },
+  "guardrails": {
+    "schema_validation": {
+      "passed": true,
+      "message": "Schema valid",
+      "details": {
+        "issues": []
+      }
+    },
+    "shap_consistency": {
+      "passed": true,
+      "message": "SHAP grounding verified",
+      "details": {
+        "top_shap_features": [
+          "c13",
+          "card2",
+          "d1",
+          "d11",
+          "d2",
+          "p_emaildomain"
+        ],
+        "features_cited_in_narrative": [
+          "card2",
+          "d2",
+          "p_emaildomain"
+        ],
+        "potentially_hallucinated_features": [],
+        "shap_sourced_in_evidence": true
+      }
+    },
+    "pii_leakage": {
+      "passed": true,
+      "message": "No PII patterns detected",
+      "details": {
+        "findings": []
+      }
+    },
+    "action_consistency": {
+      "passed": true,
+      "message": "Action consistency verified",
+      "details": {
+        "hard_violations": [],
+        "warnings": [],
+        "action": "auto_approve",
+        "risk": "low",
+        "n_reason_codes": 0
+      }
+    }
+  },
+  "tool_call_log": [
+    {
+      "iteration": 1,
+      "tool": "get_transaction_details",
+      "input": {
+        "transaction_id": 3475902
+      },
+      "output": {
+        "TransactionID": "3475902",
+        "TransactionAmt": 131.0,
+        "TransactionDT": "12753886",
+        "ProductCD": "W",
+        "card1": "13443",
+        "card4": "visa",
+        "card6": "debit",
+        "P_emaildomain": "anonymous.com",
+        "R_emaildomain": null,
+        "addr1": 472.0,
+        "addr2": 87.0,
+        "dist1": 2.0,
+        "tx_hour": 14.7461,
+        "tx_dayofweek": "0",
+        "M1": "T",
+        "M4": "M0",
+        "M5": "F",
+        "M6": "T",
+        "fraud_score": 0.0174
+      }
+    },
+    {
+      "iteration": 1,
+      "tool": "get_shap_explanation",
+      "input": {
+        "transaction_id": 3475902
+      },
+      "output": {
+        "transaction_id": 3475902,
+        "top_shap_features": [
+          {
+            "rank": 1,
+            "feature": "card2",
+            "feature_value": 555.0,
+            "shap_value": -0.4215,
+            "direction": "decreases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          },
+          {
+            "rank": 2,
+            "feature": "C13",
+            "feature_value": 34.0,
+            "shap_value": -0.40857,
+            "direction": "decreases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          },
+          {
+            "rank": 3,
+            "feature": "D11",
+            "feature_value": 589.0,
+            "shap_value": -0.32963,
+            "direction": "decreases_risk",
+            "reason_code": "R06",
+            "reason_text": "Transaction pattern deviates from established account behavior"
+          },
+          {
+            "rank": 4,
+            "feature": "D2",
+            "feature_value": 462.0,
+            "shap_value": -0.28416,
+            "direction": "decreases_risk",
+            "reason_code": "R06",
+            "reason_text": "Transaction pattern deviates from established account behavior"
+          },
+          {
+            "rank": 5,
+            "feature": "D1",
+            "feature_value": 462.0,
+            "shap_value": -0.25279,
+            "direction": "decreases_risk",
+            "reason_code": "R06",
+            "reason_text": "Transaction pattern deviates from established account behavior"
+          },
+          {
+            "rank": 6,
+            "feature": "P_emaildomain",
+            "feature_value": 1.0,
+            "shap_value": -0.22035,
+            "direction": "decreases_risk",
+            "reason_code": "R03",
+            "reason_text": "Email domain associated with elevated fraud risk"
+          }
+        ],
+        "note": "shap_value > 0 increases fraud probability; shap_value < 0 decreases it. Values are in log-odds space."
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_customer_history",
+      "input": {
+        "card_id": 13443
+      },
+      "output": {
+        "card_id": 13443,
+        "lookback_days": 30,
+        "n_transactions_in_window": 4,
+        "total_amount": 515.0,
+        "mean_amount": 128.75,
+        "max_amount": 171.0,
+        "min_amount": 80.0,
+        "unique_products": [
+          "W"
+        ],
+        "unique_email_domains": [
+          "anonymous.com"
+        ],
+        "hours_active": [
+          11,
+          12,
+          14,
+          22
+        ]
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_reason_codes",
+      "input": {
+        "transaction_id": 3475902
+      },
+      "output": {
+        "transaction_id": 3475902,
+        "adverse_action_codes": [],
+        "note": "Codes reflect features that increase fraud probability (positive SHAP only)."
+      }
+    }
+  ],
+  "iterations_used": 3,
+  "error": null
+}

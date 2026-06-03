@@ -1,0 +1,275 @@
+{
+  "eval_id": "eval_008",
+  "transaction_id": 3550585,
+  "output": {
+    "transaction_id": 3550585,
+    "risk_assessment": "high",
+    "recommended_action": "auto_decline",
+    "priority_score": 9,
+    "sar_narrative": "Transaction 3550585, a $257.48 Mastercard credit charge on ProductCD 'C' placed at approximately 20:11 local time, received a fraud score of 0.9726 from the model (get_transaction_details), indicating an extremely elevated likelihood of fraud. The SHAP explanation (get_shap_explanation) identifies V258 (SHAP: +1.48) as the dominant risk driver, reflecting elevated aggregate behavioral risk, alongside velocity-related features C1 (SHAP: +0.75), C11 (SHAP: +0.37), and C13 (SHAP: +0.30), all of which increase fraud probability. Customer history (get_customer_history) shows only a single transaction in the past 30 days for card ID 10575, totaling $257.48, meaning the model's internal velocity signals (C1, C11, C13) appear to reflect a broader behavioral pattern not fully captured in the 30-day aggregate window \u2014 this tension is noted and unresolved. Billing address fields addr1 and addr2 were both null (get_transaction_details), and multiple match indicators (M1, M5, M6) were also absent, further undermining transaction legitimacy.",
+    "adverse_action_reason_codes": [
+      "R12",
+      "R02"
+    ],
+    "supporting_evidence": [
+      {
+        "claim": "The model assigned an extremely high fraud probability to this transaction.",
+        "source": "get_transaction_details",
+        "value": "fraud_score: 0.9726"
+      },
+      {
+        "claim": "The transaction was made using a Mastercard credit card on ProductCD 'C'.",
+        "source": "get_transaction_details",
+        "value": "card4: mastercard, card6: credit, ProductCD: C"
+      },
+      {
+        "claim": "Billing address fields were entirely absent, reducing verification confidence.",
+        "source": "get_transaction_details",
+        "value": "addr1: null, addr2: null, dist1: null"
+      },
+      {
+        "claim": "Several match indicator fields were null, indicating missing or unverifiable match data.",
+        "source": "get_transaction_details",
+        "value": "M1: null, M5: null, M6: null"
+      },
+      {
+        "claim": "The transaction occurred late in the evening (approximately 8 PM).",
+        "source": "get_transaction_details",
+        "value": "tx_hour: 20.1831, tx_dayofweek: 4"
+      },
+      {
+        "claim": "The top SHAP driver (V258, rank 1) strongly increases fraud risk, reflecting elevated aggregate behavioral risk.",
+        "source": "get_shap_explanation",
+        "value": "feature: V258, feature_value: 4.0, shap_value: +1.47982, direction: increases_risk"
+      },
+      {
+        "claim": "Multiple velocity-related features (C1, C11, C13) all contribute positively to the fraud score.",
+        "source": "get_shap_explanation",
+        "value": "C1 shap: +0.75013, C11 shap: +0.37392, C13 shap: +0.29750 \u2014 all direction: increases_risk"
+      },
+      {
+        "claim": "The transaction amount itself is flagged as unusual relative to account history.",
+        "source": "get_shap_explanation",
+        "value": "feature: TransactionAmt, feature_value: 257.478, shap_value: +0.33847, direction: increases_risk"
+      },
+      {
+        "claim": "Card3 (value 111.0) is the only SHAP factor decreasing risk, partially offsetting other signals.",
+        "source": "get_shap_explanation",
+        "value": "feature: card3, feature_value: 111.0, shap_value: -1.07757, direction: decreases_risk"
+      },
+      {
+        "claim": "Only one transaction was recorded for this card in the past 30 days, totaling $257.48 \u2014 this is the flagged transaction itself.",
+        "source": "get_customer_history",
+        "value": "n_transactions_in_window: 1, total_amount: 257.48, mean_amount: 257.48"
+      },
+      {
+        "claim": "The card's recent activity is limited to a single product type and a single email domain, showing a narrow usage profile.",
+        "source": "get_customer_history",
+        "value": "unique_products: [C], unique_email_domains: [hotmail.com], hours_active: [20]"
+      },
+      {
+        "claim": "ECOA adverse action codes R12 and R02 were returned, driven by features V258 and C1 respectively.",
+        "source": "get_reason_codes",
+        "value": "R12 (driven_by: V258) \u2014 Aggregate risk score across behavioral dimensions elevated; R02 (driven_by: C1) \u2014 High transaction velocity or frequency on this card"
+      }
+    ]
+  },
+  "guardrails": {
+    "schema_validation": {
+      "passed": true,
+      "message": "Schema valid",
+      "details": {
+        "issues": []
+      }
+    },
+    "shap_consistency": {
+      "passed": true,
+      "message": "SHAP grounding verified",
+      "details": {
+        "top_shap_features": [
+          "c1",
+          "c11",
+          "c13",
+          "card3",
+          "transactionamt",
+          "v258"
+        ],
+        "features_cited_in_narrative": [
+          "card3",
+          "c13",
+          "c1",
+          "transactionamt",
+          "v258",
+          "c11"
+        ],
+        "potentially_hallucinated_features": [],
+        "shap_sourced_in_evidence": true
+      }
+    },
+    "pii_leakage": {
+      "passed": true,
+      "message": "No PII patterns detected",
+      "details": {
+        "findings": []
+      }
+    },
+    "action_consistency": {
+      "passed": true,
+      "message": "Action consistency verified",
+      "details": {
+        "hard_violations": [],
+        "warnings": [],
+        "action": "auto_decline",
+        "risk": "high",
+        "n_reason_codes": 2
+      }
+    }
+  },
+  "tool_call_log": [
+    {
+      "iteration": 1,
+      "tool": "get_transaction_details",
+      "input": {
+        "transaction_id": 3550585
+      },
+      "output": {
+        "TransactionID": "3550585",
+        "TransactionAmt": 257.478,
+        "TransactionDT": "14933459",
+        "ProductCD": "C",
+        "card1": "10575",
+        "card4": "mastercard",
+        "card6": "credit",
+        "P_emaildomain": "hotmail.com",
+        "R_emaildomain": "hotmail.com",
+        "addr1": null,
+        "addr2": null,
+        "dist1": null,
+        "tx_hour": 20.1831,
+        "tx_dayofweek": "4",
+        "M1": null,
+        "M4": "M2",
+        "M5": null,
+        "M6": null,
+        "fraud_score": 0.9726
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_shap_explanation",
+      "input": {
+        "transaction_id": 3550585
+      },
+      "output": {
+        "transaction_id": 3550585,
+        "top_shap_features": [
+          {
+            "rank": 1,
+            "feature": "V258",
+            "feature_value": 4.0,
+            "shap_value": 1.47982,
+            "direction": "increases_risk",
+            "reason_code": "R12",
+            "reason_text": "Aggregate risk score across behavioral dimensions elevated"
+          },
+          {
+            "rank": 2,
+            "feature": "card3",
+            "feature_value": 111.0,
+            "shap_value": -1.07757,
+            "direction": "decreases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          },
+          {
+            "rank": 3,
+            "feature": "C1",
+            "feature_value": 6.0,
+            "shap_value": 0.75013,
+            "direction": "increases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          },
+          {
+            "rank": 4,
+            "feature": "C11",
+            "feature_value": 3.0,
+            "shap_value": 0.37392,
+            "direction": "increases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          },
+          {
+            "rank": 5,
+            "feature": "TransactionAmt",
+            "feature_value": 257.478,
+            "shap_value": 0.33847,
+            "direction": "increases_risk",
+            "reason_code": "R01",
+            "reason_text": "Unusual transaction amount relative to account history"
+          },
+          {
+            "rank": 6,
+            "feature": "C13",
+            "feature_value": 1.0,
+            "shap_value": 0.2975,
+            "direction": "increases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          }
+        ],
+        "note": "shap_value > 0 increases fraud probability; shap_value < 0 decreases it. Values are in log-odds space."
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_customer_history",
+      "input": {
+        "card_id": 10575
+      },
+      "output": {
+        "card_id": 10575,
+        "lookback_days": 30,
+        "n_transactions_in_window": 1,
+        "total_amount": 257.48,
+        "mean_amount": 257.48,
+        "max_amount": 257.48,
+        "min_amount": 257.48,
+        "unique_products": [
+          "C"
+        ],
+        "unique_email_domains": [
+          "hotmail.com"
+        ],
+        "hours_active": [
+          20
+        ]
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_reason_codes",
+      "input": {
+        "transaction_id": 3550585
+      },
+      "output": {
+        "transaction_id": 3550585,
+        "adverse_action_codes": [
+          {
+            "code": "R12",
+            "description": "Aggregate risk score across behavioral dimensions elevated",
+            "driven_by_feature": "V258"
+          },
+          {
+            "code": "R02",
+            "description": "High transaction velocity or frequency on this card",
+            "driven_by_feature": "C1"
+          }
+        ],
+        "note": "Codes reflect features that increase fraud probability (positive SHAP only)."
+      }
+    }
+  ],
+  "iterations_used": 3,
+  "error": null
+}

@@ -1,0 +1,301 @@
+{
+  "eval_id": "eval_007",
+  "transaction_id": 3484745,
+  "output": {
+    "transaction_id": 3484745,
+    "risk_assessment": "high",
+    "recommended_action": "auto_decline",
+    "priority_score": 9,
+    "sar_narrative": "Transaction 3484745, a $77.96 ProductCD 'C' charge on a Visa credit card, received a fraud score of 0.988 from the model (get_transaction_details), placing it well above the high-risk threshold. The top two SHAP drivers (get_shap_explanation) are identity features id_09 and id_03 \u2014 both valued at 5.0 with SHAP contributions of +0.761 and +0.499 respectively \u2014 indicating multiple identity fields could not be verified; billing address fields addr1 and addr2 were also returned as null (get_transaction_details), consistent with this finding. Card type feature card6 adds an additional SHAP contribution of +0.449, and velocity-related features C13 and C11 each increase risk, corroborated by customer history showing 134 transactions on card 10568 in the past 30 days across five distinct email domains including 'anonymous.com' (get_customer_history). Taken together, the extreme model score, multiple unverified identity dimensions, elevated card-type risk, and high transaction velocity present a pattern that appears consistent with fraudulent activity warranting immediate adverse action.",
+    "adverse_action_reason_codes": [
+      "R10",
+      "R09",
+      "R12"
+    ],
+    "supporting_evidence": [
+      {
+        "claim": "The model assigned an extremely high fraud probability of 0.988, well above the 0.70 high-risk threshold.",
+        "source": "get_transaction_details",
+        "value": "fraud_score: 0.988"
+      },
+      {
+        "claim": "Identity feature id_09 (value 5.0) is the top SHAP driver, increasing fraud probability with a contribution of +0.761 in log-odds space, indicating multiple identity fields could not be verified.",
+        "source": "get_shap_explanation",
+        "value": "rank 1: feature=id_09, feature_value=5.0, shap_value=0.76116, direction=increases_risk"
+      },
+      {
+        "claim": "Identity feature id_03 (value 5.0) is the second-ranked SHAP driver with a contribution of +0.499, further corroborating identity verification failure.",
+        "source": "get_shap_explanation",
+        "value": "rank 2: feature=id_03, feature_value=5.0, shap_value=0.49933, direction=increases_risk"
+      },
+      {
+        "claim": "Billing address fields addr1 and addr2 were both null, consistent with the identity verification failures flagged by SHAP.",
+        "source": "get_transaction_details",
+        "value": "addr1: null, addr2: null"
+      },
+      {
+        "claim": "Multiple match fields (M1, M5, M6) were null, indicating absent verification data.",
+        "source": "get_transaction_details",
+        "value": "M1: null, M5: null, M6: null"
+      },
+      {
+        "claim": "Card type feature card6 contributes +0.449 to fraud probability, indicating the card issuer profile is associated with elevated risk.",
+        "source": "get_shap_explanation",
+        "value": "rank 3: feature=card6, feature_value=1.0, shap_value=0.44901, direction=increases_risk"
+      },
+      {
+        "claim": "Velocity-related features C13 and C11 both increase fraud risk, with SHAP contributions of +0.322 and +0.245 respectively.",
+        "source": "get_shap_explanation",
+        "value": "rank 5: feature=C13, shap_value=0.32205; rank 6: feature=C11, shap_value=0.24522, both direction=increases_risk"
+      },
+      {
+        "claim": "Card 10568 has 134 transactions in the past 30 days, indicating extremely high transaction velocity consistent with the SHAP velocity flags.",
+        "source": "get_customer_history",
+        "value": "n_transactions_in_window: 134, lookback_days: 30"
+      },
+      {
+        "claim": "Card 10568 has transacted across five distinct email domains including 'anonymous.com', suggesting unusual account-linkage patterns.",
+        "source": "get_customer_history",
+        "value": "unique_email_domains: [outlook.com, gmail.com, hotmail.com, anonymous.com, yahoo.com.mx]"
+      },
+      {
+        "claim": "The transaction amount of $77.96 is above the card's 30-day mean of $34.48, though within historical range (max $181.12).",
+        "source": "get_customer_history",
+        "value": "mean_amount: 34.48, max_amount: 181.12, TransactionAmt: 77.957"
+      },
+      {
+        "claim": "ECOA adverse action codes R10, R09, and R12 were returned, driven by identity verification failure (id_09), card type risk (card6), and elevated aggregate behavioral risk score (V187).",
+        "source": "get_reason_codes",
+        "value": "adverse_action_codes: [R10 (id_09), R09 (card6), R12 (V187)]"
+      }
+    ]
+  },
+  "guardrails": {
+    "schema_validation": {
+      "passed": true,
+      "message": "Schema valid",
+      "details": {
+        "issues": []
+      }
+    },
+    "shap_consistency": {
+      "passed": true,
+      "message": "SHAP grounding verified",
+      "details": {
+        "top_shap_features": [
+          "c11",
+          "c13",
+          "card6",
+          "id_03",
+          "id_09",
+          "v187"
+        ],
+        "features_cited_in_narrative": [
+          "id_09",
+          "c13",
+          "id_03",
+          "card6",
+          "c11"
+        ],
+        "potentially_hallucinated_features": [],
+        "shap_sourced_in_evidence": true
+      }
+    },
+    "pii_leakage": {
+      "passed": true,
+      "message": "No PII patterns detected",
+      "details": {
+        "findings": []
+      }
+    },
+    "action_consistency": {
+      "passed": true,
+      "message": "Action consistency verified",
+      "details": {
+        "hard_violations": [],
+        "warnings": [],
+        "action": "auto_decline",
+        "risk": "high",
+        "n_reason_codes": 3
+      }
+    }
+  },
+  "tool_call_log": [
+    {
+      "iteration": 1,
+      "tool": "get_transaction_details",
+      "input": {
+        "transaction_id": 3484745
+      },
+      "output": {
+        "TransactionID": "3484745",
+        "TransactionAmt": 77.957,
+        "TransactionDT": "13038214",
+        "ProductCD": "C",
+        "card1": "10568",
+        "card4": "visa",
+        "card6": "credit",
+        "P_emaildomain": "gmail.com",
+        "R_emaildomain": "gmail.com",
+        "addr1": null,
+        "addr2": null,
+        "dist1": null,
+        "tx_hour": 21.7261,
+        "tx_dayofweek": "3",
+        "M1": null,
+        "M4": "M0",
+        "M5": null,
+        "M6": null,
+        "fraud_score": 0.988
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_shap_explanation",
+      "input": {
+        "transaction_id": 3484745
+      },
+      "output": {
+        "transaction_id": 3484745,
+        "top_shap_features": [
+          {
+            "rank": 1,
+            "feature": "id_09",
+            "feature_value": 5.0,
+            "shap_value": 0.76116,
+            "direction": "increases_risk",
+            "reason_code": "R10",
+            "reason_text": "Multiple identity fields could not be verified"
+          },
+          {
+            "rank": 2,
+            "feature": "id_03",
+            "feature_value": 5.0,
+            "shap_value": 0.49933,
+            "direction": "increases_risk",
+            "reason_code": "R10",
+            "reason_text": "Multiple identity fields could not be verified"
+          },
+          {
+            "rank": 3,
+            "feature": "card6",
+            "feature_value": 1.0,
+            "shap_value": 0.44901,
+            "direction": "increases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          },
+          {
+            "rank": 4,
+            "feature": "V187",
+            "feature_value": 2.0,
+            "shap_value": 0.33996,
+            "direction": "increases_risk",
+            "reason_code": "R12",
+            "reason_text": "Aggregate risk score across behavioral dimensions elevated"
+          },
+          {
+            "rank": 5,
+            "feature": "C13",
+            "feature_value": 1.0,
+            "shap_value": 0.32205,
+            "direction": "increases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          },
+          {
+            "rank": 6,
+            "feature": "C11",
+            "feature_value": 2.0,
+            "shap_value": 0.24522,
+            "direction": "increases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          }
+        ],
+        "note": "shap_value > 0 increases fraud probability; shap_value < 0 decreases it. Values are in log-odds space."
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_customer_history",
+      "input": {
+        "card_id": 10568
+      },
+      "output": {
+        "card_id": 10568,
+        "lookback_days": 30,
+        "n_transactions_in_window": 134,
+        "total_amount": 4620.26,
+        "mean_amount": 34.48,
+        "max_amount": 181.12,
+        "min_amount": 1.31,
+        "unique_products": [
+          "C"
+        ],
+        "unique_email_domains": [
+          "outlook.com",
+          "gmail.com",
+          "hotmail.com",
+          "anonymous.com",
+          "yahoo.com.mx"
+        ],
+        "hours_active": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          10,
+          11,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24
+        ]
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_reason_codes",
+      "input": {
+        "transaction_id": 3484745
+      },
+      "output": {
+        "transaction_id": 3484745,
+        "adverse_action_codes": [
+          {
+            "code": "R10",
+            "description": "Multiple identity fields could not be verified",
+            "driven_by_feature": "id_09"
+          },
+          {
+            "code": "R09",
+            "description": "Card type or issuer profile associated with elevated risk",
+            "driven_by_feature": "card6"
+          },
+          {
+            "code": "R12",
+            "description": "Aggregate risk score across behavioral dimensions elevated",
+            "driven_by_feature": "V187"
+          }
+        ],
+        "note": "Codes reflect features that increase fraud probability (positive SHAP only)."
+      }
+    }
+  ],
+  "iterations_used": 3,
+  "error": null
+}

@@ -1,0 +1,259 @@
+{
+  "eval_id": "eval_015",
+  "transaction_id": 3506861,
+  "output": {
+    "transaction_id": 3506861,
+    "risk_assessment": "low",
+    "recommended_action": "auto_approve",
+    "priority_score": 2,
+    "sar_narrative": "Transaction 3506861, a $139.95 debit Visa purchase of product type 'W' occurring at approximately 22:00 hours, received a fraud score of 0.0189 per get_transaction_details, well below the low-risk threshold of 0.40. Per get_shap_explanation, four of the six top SHAP features actively decrease fraud probability \u2014 notably C13 (SHAP: -0.49049), D1 (SHAP: -0.43863), and C14 (SHAP: -0.39299) \u2014 while only C1 and C9 modestly increase risk, both attributed to transaction velocity patterns. get_customer_history confirms this card (card1: 12208) has conducted 8 transactions over the past 30 days exclusively in product type 'W', with hour 22 appearing in its established active-hours profile, indicating the flagged transaction appears consistent with established card behavior. The sole adverse action reason code returned by get_reason_codes is R02 (high velocity on C1), which is outweighed by the strong risk-reducing signals across the remaining top features.",
+    "adverse_action_reason_codes": [],
+    "supporting_evidence": [
+      {
+        "claim": "The model assigned a very low fraud probability to this transaction.",
+        "source": "get_transaction_details",
+        "value": "fraud_score: 0.0189"
+      },
+      {
+        "claim": "The transaction amount is $139.95 on a Visa debit card for product type 'W'.",
+        "source": "get_transaction_details",
+        "value": "TransactionAmt: 139.95, card4: visa, card6: debit, ProductCD: W"
+      },
+      {
+        "claim": "The transaction occurred late at night, around 22:00 hours.",
+        "source": "get_transaction_details",
+        "value": "tx_hour: 22.0408"
+      },
+      {
+        "claim": "The top SHAP feature (C13) strongly decreases fraud probability.",
+        "source": "get_shap_explanation",
+        "value": "feature: C13, feature_value: 367.0, shap_value: -0.49049, direction: decreases_risk"
+      },
+      {
+        "claim": "The second-ranked SHAP feature (D1) also strongly decreases fraud probability.",
+        "source": "get_shap_explanation",
+        "value": "feature: D1, feature_value: 610.0, shap_value: -0.43863, direction: decreases_risk"
+      },
+      {
+        "claim": "Two features (C1 and C9) modestly increase fraud probability, attributed to velocity patterns.",
+        "source": "get_shap_explanation",
+        "value": "C1 shap_value: 0.37066 (increases_risk); C9 shap_value: 0.29185 (increases_risk)"
+      },
+      {
+        "claim": "The card has a consistent 30-day transaction history exclusively in product type 'W', with hour 22 within its established active hours.",
+        "source": "get_customer_history",
+        "value": "n_transactions_in_window: 8, unique_products: [W], hours_active: [1, 2, 16, 17, 19, 21, 22, 24]"
+      },
+      {
+        "claim": "The flagged amount ($139.95) is the maximum observed on this card over the 30-day lookback, but is not a significant outlier relative to the card's average.",
+        "source": "get_customer_history",
+        "value": "max_amount: 139.95, mean_amount: 64.2, min_amount: 35.95"
+      },
+      {
+        "claim": "The only adverse action reason code returned is R02, driven by feature C1 (velocity), consistent with the SHAP findings.",
+        "source": "get_reason_codes",
+        "value": "code: R02, description: High transaction velocity or frequency on this card, driven_by_feature: C1"
+      }
+    ]
+  },
+  "guardrails": {
+    "schema_validation": {
+      "passed": true,
+      "message": "Schema valid",
+      "details": {
+        "issues": []
+      }
+    },
+    "shap_consistency": {
+      "passed": true,
+      "message": "SHAP grounding verified",
+      "details": {
+        "top_shap_features": [
+          "c1",
+          "c13",
+          "c14",
+          "c9",
+          "card5",
+          "d1"
+        ],
+        "features_cited_in_narrative": [
+          "c9",
+          "d1",
+          "c13",
+          "c1"
+        ],
+        "potentially_hallucinated_features": [],
+        "shap_sourced_in_evidence": true
+      }
+    },
+    "pii_leakage": {
+      "passed": true,
+      "message": "No PII patterns detected",
+      "details": {
+        "findings": []
+      }
+    },
+    "action_consistency": {
+      "passed": true,
+      "message": "Action consistency verified",
+      "details": {
+        "hard_violations": [],
+        "warnings": [],
+        "action": "auto_approve",
+        "risk": "low",
+        "n_reason_codes": 0
+      }
+    }
+  },
+  "tool_call_log": [
+    {
+      "iteration": 1,
+      "tool": "get_transaction_details",
+      "input": {
+        "transaction_id": 3506861
+      },
+      "output": {
+        "TransactionID": "3506861",
+        "TransactionAmt": 139.95,
+        "TransactionDT": "13644147",
+        "ProductCD": "W",
+        "card1": "12208",
+        "card4": "visa",
+        "card6": "debit",
+        "P_emaildomain": "msn.com",
+        "R_emaildomain": null,
+        "addr1": 264.0,
+        "addr2": 87.0,
+        "dist1": 286.0,
+        "tx_hour": 22.0408,
+        "tx_dayofweek": "3",
+        "M1": "T",
+        "M4": null,
+        "M5": null,
+        "M6": "T",
+        "fraud_score": 0.0189
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_shap_explanation",
+      "input": {
+        "transaction_id": 3506861
+      },
+      "output": {
+        "transaction_id": 3506861,
+        "top_shap_features": [
+          {
+            "rank": 1,
+            "feature": "C13",
+            "feature_value": 367.0,
+            "shap_value": -0.49049,
+            "direction": "decreases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          },
+          {
+            "rank": 2,
+            "feature": "D1",
+            "feature_value": 610.0,
+            "shap_value": -0.43863,
+            "direction": "decreases_risk",
+            "reason_code": "R06",
+            "reason_text": "Transaction pattern deviates from established account behavior"
+          },
+          {
+            "rank": 3,
+            "feature": "C14",
+            "feature_value": 67.0,
+            "shap_value": -0.39299,
+            "direction": "decreases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          },
+          {
+            "rank": 4,
+            "feature": "C1",
+            "feature_value": 76.0,
+            "shap_value": 0.37066,
+            "direction": "increases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          },
+          {
+            "rank": 5,
+            "feature": "card5",
+            "feature_value": 166.0,
+            "shap_value": -0.3254,
+            "direction": "decreases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          },
+          {
+            "rank": 6,
+            "feature": "C9",
+            "feature_value": 47.0,
+            "shap_value": 0.29185,
+            "direction": "increases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          }
+        ],
+        "note": "shap_value > 0 increases fraud probability; shap_value < 0 decreases it. Values are in log-odds space."
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_customer_history",
+      "input": {
+        "card_id": 12208
+      },
+      "output": {
+        "card_id": 12208,
+        "lookback_days": 30,
+        "n_transactions_in_window": 8,
+        "total_amount": 513.6,
+        "mean_amount": 64.2,
+        "max_amount": 139.95,
+        "min_amount": 35.95,
+        "unique_products": [
+          "W"
+        ],
+        "unique_email_domains": [
+          "gmail.com",
+          "msn.com",
+          "ymail.com"
+        ],
+        "hours_active": [
+          1,
+          2,
+          16,
+          17,
+          19,
+          21,
+          22,
+          24
+        ]
+      }
+    },
+    {
+      "iteration": 3,
+      "tool": "get_reason_codes",
+      "input": {
+        "transaction_id": 3506861
+      },
+      "output": {
+        "transaction_id": 3506861,
+        "adverse_action_codes": [
+          {
+            "code": "R02",
+            "description": "High transaction velocity or frequency on this card",
+            "driven_by_feature": "C1"
+          }
+        ],
+        "note": "Codes reflect features that increase fraud probability (positive SHAP only)."
+      }
+    }
+  ],
+  "iterations_used": 4,
+  "error": null
+}

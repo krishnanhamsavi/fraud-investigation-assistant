@@ -1,0 +1,265 @@
+{
+  "eval_id": "eval_025",
+  "transaction_id": 3506088,
+  "output": {
+    "transaction_id": 3506088,
+    "risk_assessment": "medium",
+    "recommended_action": "escalate",
+    "priority_score": 5,
+    "sar_narrative": "Transaction 3506088 received a fraud score of 0.4752 from the model (get_transaction_details), placing it in the medium-risk tier. SHAP analysis (get_shap_explanation) identifies three risk-increasing features \u2014 V294 (SHAP +0.362), V281 (SHAP +0.254), and D2 (SHAP +0.226) \u2014 indicating elevated aggregate behavioral risk dimensions and deviation from established account patterns, partially offset by card profile and transaction amount signals. Customer history for card 17961 (get_customer_history) shows the flagged amount of $34.54 is consistent with the card's minimum observed spend and the product type 'W' and transaction hour (~17:20) align with prior activity, though the card has only 4 transactions in the lookback window, limiting behavioral baseline confidence. Notably, both purchaser and recipient email domains are null (get_transaction_details), an absence that may warrant additional verification by the reviewing analyst.",
+    "adverse_action_reason_codes": [
+      "R12"
+    ],
+    "supporting_evidence": [
+      {
+        "claim": "The model assigned a medium-range fraud probability score to this transaction.",
+        "source": "get_transaction_details",
+        "value": "fraud_score: 0.4752"
+      },
+      {
+        "claim": "Both purchaser and recipient email domains are absent, which may represent a risk signal.",
+        "source": "get_transaction_details",
+        "value": "P_emaildomain: null, R_emaildomain: null"
+      },
+      {
+        "claim": "The transaction occurred on a Visa debit card for product type W at approximately 17:20 on a Wednesday.",
+        "source": "get_transaction_details",
+        "value": "card4: visa, card6: debit, ProductCD: W, tx_hour: 17.3467, tx_dayofweek: 3"
+      },
+      {
+        "claim": "V294 is the top risk-increasing SHAP feature, indicating elevated aggregate behavioral risk.",
+        "source": "get_shap_explanation",
+        "value": "feature: V294, feature_value: 1.0, shap_value: +0.3619, direction: increases_risk"
+      },
+      {
+        "claim": "V281 is the second-highest risk-increasing SHAP feature, further elevating the behavioral risk score.",
+        "source": "get_shap_explanation",
+        "value": "feature: V281, feature_value: 2.0, shap_value: +0.25387, direction: increases_risk"
+      },
+      {
+        "claim": "D2 (days since a prior event) value of 1.0 is flagged as deviating from established account behavior.",
+        "source": "get_shap_explanation",
+        "value": "feature: D2, feature_value: 1.0, shap_value: +0.22641, direction: increases_risk, reason_text: Transaction pattern deviates from established account behavior"
+      },
+      {
+        "claim": "The card2 and card6 features partially decrease the fraud risk contribution in the model.",
+        "source": "get_shap_explanation",
+        "value": "card2 shap_value: -0.36747 (decreases_risk); card6 shap_value: -0.21589 (decreases_risk)"
+      },
+      {
+        "claim": "The flagged transaction amount of $34.54 is the minimum spend observed for this card in the past 30 days, appearing consistent with prior behavior.",
+        "source": "get_customer_history",
+        "value": "min_amount: 34.54, mean_amount: 52.89, max_amount: 107.95"
+      },
+      {
+        "claim": "The product type and transaction hour for this transaction are consistent with the card's established behavioral profile.",
+        "source": "get_customer_history",
+        "value": "unique_products: [W], hours_active: [17, 20, 22]"
+      },
+      {
+        "claim": "The card has a limited transaction history of only 4 transactions in the 30-day lookback window, reducing behavioral baseline confidence.",
+        "source": "get_customer_history",
+        "value": "n_transactions_in_window: 4"
+      },
+      {
+        "claim": "The ECOA adverse action reason code R12 is driven by the elevated V294 behavioral risk feature.",
+        "source": "get_reason_codes",
+        "value": "code: R12, description: Aggregate risk score across behavioral dimensions elevated, driven_by_feature: V294"
+      }
+    ]
+  },
+  "guardrails": {
+    "schema_validation": {
+      "passed": true,
+      "message": "Schema valid",
+      "details": {
+        "issues": []
+      }
+    },
+    "shap_consistency": {
+      "passed": true,
+      "message": "SHAP grounding verified",
+      "details": {
+        "top_shap_features": [
+          "card2",
+          "card6",
+          "d2",
+          "transactionamt",
+          "v281",
+          "v294"
+        ],
+        "features_cited_in_narrative": [
+          "v294",
+          "card2",
+          "d2",
+          "v281",
+          "card6"
+        ],
+        "potentially_hallucinated_features": [],
+        "shap_sourced_in_evidence": true
+      }
+    },
+    "pii_leakage": {
+      "passed": true,
+      "message": "No PII patterns detected",
+      "details": {
+        "findings": []
+      }
+    },
+    "action_consistency": {
+      "passed": true,
+      "message": "Action consistency verified",
+      "details": {
+        "hard_violations": [],
+        "warnings": [],
+        "action": "escalate",
+        "risk": "medium",
+        "n_reason_codes": 1
+      }
+    }
+  },
+  "tool_call_log": [
+    {
+      "iteration": 1,
+      "tool": "get_transaction_details",
+      "input": {
+        "transaction_id": 3506088
+      },
+      "output": {
+        "TransactionID": "3506088",
+        "TransactionAmt": 34.54,
+        "TransactionDT": "13627248",
+        "ProductCD": "W",
+        "card1": "17961",
+        "card4": "visa",
+        "card6": "debit",
+        "P_emaildomain": null,
+        "R_emaildomain": null,
+        "addr1": 158.0,
+        "addr2": 87.0,
+        "dist1": null,
+        "tx_hour": 17.3467,
+        "tx_dayofweek": "3",
+        "M1": "T",
+        "M4": "M1",
+        "M5": "T",
+        "M6": null,
+        "fraud_score": 0.4752
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_shap_explanation",
+      "input": {
+        "transaction_id": 3506088
+      },
+      "output": {
+        "transaction_id": 3506088,
+        "top_shap_features": [
+          {
+            "rank": 1,
+            "feature": "card2",
+            "feature_value": 467.0,
+            "shap_value": -0.36747,
+            "direction": "decreases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          },
+          {
+            "rank": 2,
+            "feature": "V294",
+            "feature_value": 1.0,
+            "shap_value": 0.3619,
+            "direction": "increases_risk",
+            "reason_code": "R12",
+            "reason_text": "Aggregate risk score across behavioral dimensions elevated"
+          },
+          {
+            "rank": 3,
+            "feature": "V281",
+            "feature_value": 2.0,
+            "shap_value": 0.25387,
+            "direction": "increases_risk",
+            "reason_code": "R12",
+            "reason_text": "Aggregate risk score across behavioral dimensions elevated"
+          },
+          {
+            "rank": 4,
+            "feature": "TransactionAmt",
+            "feature_value": 34.54,
+            "shap_value": -0.24015,
+            "direction": "decreases_risk",
+            "reason_code": "R01",
+            "reason_text": "Unusual transaction amount relative to account history"
+          },
+          {
+            "rank": 5,
+            "feature": "D2",
+            "feature_value": 1.0,
+            "shap_value": 0.22641,
+            "direction": "increases_risk",
+            "reason_code": "R06",
+            "reason_text": "Transaction pattern deviates from established account behavior"
+          },
+          {
+            "rank": 6,
+            "feature": "card6",
+            "feature_value": 2.0,
+            "shap_value": -0.21589,
+            "direction": "decreases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          }
+        ],
+        "note": "shap_value > 0 increases fraud probability; shap_value < 0 decreases it. Values are in log-odds space."
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_customer_history",
+      "input": {
+        "card_id": 17961
+      },
+      "output": {
+        "card_id": 17961,
+        "lookback_days": 30,
+        "n_transactions_in_window": 4,
+        "total_amount": 211.57,
+        "mean_amount": 52.89,
+        "max_amount": 107.95,
+        "min_amount": 34.54,
+        "unique_products": [
+          "W"
+        ],
+        "unique_email_domains": [
+          "anonymous.com"
+        ],
+        "hours_active": [
+          17,
+          20,
+          22
+        ]
+      }
+    },
+    {
+      "iteration": 3,
+      "tool": "get_reason_codes",
+      "input": {
+        "transaction_id": 3506088
+      },
+      "output": {
+        "transaction_id": 3506088,
+        "adverse_action_codes": [
+          {
+            "code": "R12",
+            "description": "Aggregate risk score across behavioral dimensions elevated",
+            "driven_by_feature": "V294"
+          }
+        ],
+        "note": "Codes reflect features that increase fraud probability (positive SHAP only)."
+      }
+    }
+  ],
+  "iterations_used": 4,
+  "error": null
+}

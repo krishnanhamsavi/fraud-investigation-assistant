@@ -9,15 +9,17 @@ ieee-fraud-detection.zip
 # Secrets
 .env
 
-# Model artifacts
+# Model artifacts (root-level only — do NOT match src/models/ source code)
 *.pkl
 *.joblib
 mlruns/
-models/
+/models/
 
 # Generated result artifacts (plots, metrics) — reproduced by running notebooks
 docs/results/*.png
 docs/results/*.json
+# Exception: tiny metrics file the hosted demo sidebar reads
+!docs/results/champion_metrics.json
 data/processed/shap_values.npy
 data/processed/shap_X_sample.parquet
 
@@ -53,6 +55,6 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Eval results (generated, not committed)
-evals/results/*.json
-evals/results/*.jsonl
+# Eval results: the per-case JSON results ARE committed — they power the hosted
+# static demo (each embeds full tool outputs). Only the rolled-up summary is ignored.
+evals/results/eval_summary.json

@@ -1,0 +1,274 @@
+{
+  "eval_id": "eval_019",
+  "transaction_id": 3478162,
+  "output": {
+    "transaction_id": 3478162,
+    "risk_assessment": "medium",
+    "recommended_action": "escalate",
+    "priority_score": 5,
+    "sar_narrative": "Transaction 3478162, a Product CD 'C' debit Mastercard purchase of $19.80, received a fraud score of 0.4782 from the model (get_transaction_details), placing it in the medium-risk band. The top risk-increasing SHAP contributors (get_shap_explanation) are id_06 = -9.0 (SHAP +0.227, indicating multiple identity fields could not be verified) and tx_hour \u2248 5.78 (SHAP +0.176, flagging an early-morning time-of-day anomaly). Customer history (get_customer_history) for card 5347 shows 18 transactions over 30 days across five distinct email domains including 'anonymous.com', and billing address fields addr1 and addr2 were returned as null by get_transaction_details, indicating missing identity anchoring data. Based on the adverse action codes returned (get_reason_codes), the primary risk drivers are unverified identity fields (R10) and time-of-day anomaly (R07), and this transaction is recommended for human analyst escalation.",
+    "adverse_action_reason_codes": [
+      "R10",
+      "R07"
+    ],
+    "supporting_evidence": [
+      {
+        "claim": "The model assigned a medium-range fraud probability score to this transaction.",
+        "source": "get_transaction_details",
+        "value": "fraud_score: 0.4782"
+      },
+      {
+        "claim": "The transaction occurred in the early morning hours, flagged as a time-of-day anomaly.",
+        "source": "get_transaction_details",
+        "value": "tx_hour: 5.7789"
+      },
+      {
+        "claim": "The transaction amount of $19.80 is below the card's 30-day mean of $40.91, partially decreasing modeled risk.",
+        "source": "get_customer_history",
+        "value": "mean_amount: 40.91, TransactionAmt: 19.797"
+      },
+      {
+        "claim": "Billing address fields were absent, removing a key identity-anchoring signal.",
+        "source": "get_transaction_details",
+        "value": "addr1: null, addr2: null"
+      },
+      {
+        "claim": "Identity field id_06 returned a value of -9.0, which the model associates with multiple unverifiable identity fields and is the top risk-increasing SHAP feature.",
+        "source": "get_shap_explanation",
+        "value": "feature: id_06, feature_value: -9.0, shap_value: 0.22722, direction: increases_risk"
+      },
+      {
+        "claim": "Transaction time-of-day is the second-highest risk-increasing SHAP feature, indicating an anomalous hour for this card.",
+        "source": "get_shap_explanation",
+        "value": "feature: tx_hour, feature_value: 5.778888888888889, shap_value: 0.17616, direction: increases_risk"
+      },
+      {
+        "claim": "Card 5347 has used five distinct email domains in the past 30 days, including 'anonymous.com', indicating behavioral variability.",
+        "source": "get_customer_history",
+        "value": "unique_email_domains: [\"hotmail.com\", \"gmail.com\", \"anonymous.com\", \"live.com.mx\", \"yahoo.com\"]"
+      },
+      {
+        "claim": "Card 5347 has been active during hour 5 previously, which partially mitigates but does not eliminate the time-of-day anomaly signal.",
+        "source": "get_customer_history",
+        "value": "hours_active: [1, 2, 3, 5, 14, 18, 19, 20, 21]"
+      },
+      {
+        "claim": "Adverse action reason codes confirm that unverified identity fields (R10) and time-of-day anomaly (R07) are the primary risk drivers.",
+        "source": "get_reason_codes",
+        "value": "adverse_action_codes: [{\"code\": \"R10\", \"description\": \"Multiple identity fields could not be verified\"}, {\"code\": \"R07\", \"description\": \"Time-of-day or day-of-week anomaly for this account\"}]"
+      }
+    ]
+  },
+  "guardrails": {
+    "schema_validation": {
+      "passed": true,
+      "message": "Schema valid",
+      "details": {
+        "issues": []
+      }
+    },
+    "shap_consistency": {
+      "passed": true,
+      "message": "SHAP grounding verified",
+      "details": {
+        "top_shap_features": [
+          "c1",
+          "c11",
+          "card6",
+          "id_06",
+          "transactionamt",
+          "tx_hour"
+        ],
+        "features_cited_in_narrative": [
+          "tx_hour",
+          "id_06"
+        ],
+        "potentially_hallucinated_features": [],
+        "shap_sourced_in_evidence": true
+      }
+    },
+    "pii_leakage": {
+      "passed": false,
+      "message": "PII patterns found: 1 type(s)",
+      "details": {
+        "findings": [
+          {
+            "type": "possible card number (13\u201316 digit sequence)",
+            "count": 1,
+            "redacted_example": "[REDACTED]"
+          }
+        ]
+      }
+    },
+    "action_consistency": {
+      "passed": true,
+      "message": "Action consistency verified",
+      "details": {
+        "hard_violations": [],
+        "warnings": [],
+        "action": "escalate",
+        "risk": "medium",
+        "n_reason_codes": 2
+      }
+    }
+  },
+  "tool_call_log": [
+    {
+      "iteration": 1,
+      "tool": "get_transaction_details",
+      "input": {
+        "transaction_id": 3478162
+      },
+      "output": {
+        "TransactionID": "3478162",
+        "TransactionAmt": 19.797,
+        "TransactionDT": "12808004",
+        "ProductCD": "C",
+        "card1": "5347",
+        "card4": "mastercard",
+        "card6": "debit",
+        "P_emaildomain": "gmail.com",
+        "R_emaildomain": "gmail.com",
+        "addr1": null,
+        "addr2": null,
+        "dist1": null,
+        "tx_hour": 5.7789,
+        "tx_dayofweek": "1",
+        "M1": null,
+        "M4": "M2",
+        "M5": null,
+        "M6": null,
+        "fraud_score": 0.4782
+      }
+    },
+    {
+      "iteration": 1,
+      "tool": "get_shap_explanation",
+      "input": {
+        "transaction_id": 3478162
+      },
+      "output": {
+        "transaction_id": 3478162,
+        "top_shap_features": [
+          {
+            "rank": 1,
+            "feature": "TransactionAmt",
+            "feature_value": 19.797,
+            "shap_value": -0.30196,
+            "direction": "decreases_risk",
+            "reason_code": "R01",
+            "reason_text": "Unusual transaction amount relative to account history"
+          },
+          {
+            "rank": 2,
+            "feature": "card6",
+            "feature_value": 2.0,
+            "shap_value": -0.26897,
+            "direction": "decreases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          },
+          {
+            "rank": 3,
+            "feature": "id_06",
+            "feature_value": -9.0,
+            "shap_value": 0.22722,
+            "direction": "increases_risk",
+            "reason_code": "R10",
+            "reason_text": "Multiple identity fields could not be verified"
+          },
+          {
+            "rank": 4,
+            "feature": "tx_hour",
+            "feature_value": 5.778888888888889,
+            "shap_value": 0.17616,
+            "direction": "increases_risk",
+            "reason_code": "R07",
+            "reason_text": "Time-of-day or day-of-week anomaly for this account"
+          },
+          {
+            "rank": 5,
+            "feature": "C11",
+            "feature_value": 1.0,
+            "shap_value": -0.16339,
+            "direction": "decreases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          },
+          {
+            "rank": 6,
+            "feature": "C1",
+            "feature_value": 1.0,
+            "shap_value": -0.15507,
+            "direction": "decreases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          }
+        ],
+        "note": "shap_value > 0 increases fraud probability; shap_value < 0 decreases it. Values are in log-odds space."
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_customer_history",
+      "input": {
+        "card_id": 5347
+      },
+      "output": {
+        "card_id": 5347,
+        "lookback_days": 30,
+        "n_transactions_in_window": 18,
+        "total_amount": 736.47,
+        "mean_amount": 40.91,
+        "max_amount": 101.63,
+        "min_amount": 14.88,
+        "unique_products": [
+          "C"
+        ],
+        "unique_email_domains": [
+          "hotmail.com",
+          "gmail.com",
+          "anonymous.com",
+          "live.com.mx",
+          "yahoo.com"
+        ],
+        "hours_active": [
+          1,
+          2,
+          3,
+          5,
+          14,
+          18,
+          19,
+          20,
+          21
+        ]
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_reason_codes",
+      "input": {
+        "transaction_id": 3478162
+      },
+      "output": {
+        "transaction_id": 3478162,
+        "adverse_action_codes": [
+          {
+            "code": "R10",
+            "description": "Multiple identity fields could not be verified",
+            "driven_by_feature": "id_06"
+          },
+          {
+            "code": "R07",
+            "description": "Time-of-day or day-of-week anomaly for this account",
+            "driven_by_feature": "tx_hour"
+          }
+        ],
+        "note": "Codes reflect features that increase fraud probability (positive SHAP only)."
+      }
+    }
+  ],
+  "iterations_used": 3,
+  "error": null
+}

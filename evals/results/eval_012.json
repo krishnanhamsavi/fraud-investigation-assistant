@@ -1,0 +1,242 @@
+{
+  "eval_id": "eval_012",
+  "transaction_id": 3519506,
+  "output": {
+    "transaction_id": 3519506,
+    "risk_assessment": "low",
+    "recommended_action": "auto_approve",
+    "priority_score": 1,
+    "sar_narrative": "Transaction 3519506 received a fraud score of 0.0379 per get_transaction_details, placing it well below the low-risk threshold of 0.40. get_shap_explanation shows that 5 of the top 6 SHAP contributors decrease fraud probability \u2014 notably V70 (SHAP -0.283), TransactionAmt at $35.95 (SHAP -0.258), and addr1=143 (SHAP -0.156) \u2014 with only tx_hour at 11.53 modestly increasing risk (SHAP +0.157). get_customer_history confirms the card (card1=4944) has been active during hours 11\u201313 in the prior 30 days, uses exclusively gmail.com and product type 'W', and that $35.95 is the minimum observed transaction amount, consistent with established spending behavior. The sole adverse action code returned by get_reason_codes is R07 (time-of-day anomaly), which appears weakly supported given the card's documented activity hours.",
+    "adverse_action_reason_codes": [],
+    "supporting_evidence": [
+      {
+        "claim": "The model's fraud probability score is very low at 0.0379, well below the low-risk threshold of 0.40.",
+        "source": "get_transaction_details",
+        "value": "fraud_score: 0.0379"
+      },
+      {
+        "claim": "The transaction amount of $35.95 is the lowest observed on this card over the past 30 days, indicating it is within normal spending range.",
+        "source": "get_customer_history",
+        "value": "min_amount: 35.95, mean_amount: 50.35, max_amount: 107.95"
+      },
+      {
+        "claim": "Five of six top SHAP features decrease fraud probability, with the strongest being V70 (SHAP -0.283) and TransactionAmt (SHAP -0.258).",
+        "source": "get_shap_explanation",
+        "value": "V70 shap_value: -0.28271 (decreases_risk); TransactionAmt shap_value: -0.25753 (decreases_risk)"
+      },
+      {
+        "claim": "The only risk-increasing SHAP feature is tx_hour (11.53), but card history shows the card is active during hours 11\u201313, reducing concern about this anomaly.",
+        "source": "get_shap_explanation",
+        "value": "tx_hour shap_value: +0.15726 (increases_risk)"
+      },
+      {
+        "claim": "Card history confirms the card transacts exclusively in hours 11\u201318, consistent with the flagged transaction hour of 11.53.",
+        "source": "get_customer_history",
+        "value": "hours_active: [11, 12, 13, 18]"
+      },
+      {
+        "claim": "The email domain gmail.com and product code 'W' in this transaction match the card's exclusive historical patterns.",
+        "source": "get_customer_history",
+        "value": "unique_products: ['W'], unique_email_domains: ['gmail.com']"
+      },
+      {
+        "claim": "get_reason_codes returned only a single adverse action code (R07: time-of-day anomaly), with no other fraud-positive signals.",
+        "source": "get_reason_codes",
+        "value": "adverse_action_codes: [{code: 'R07', description: 'Time-of-day or day-of-week anomaly for this account', driven_by_feature: 'tx_hour'}]"
+      }
+    ]
+  },
+  "guardrails": {
+    "schema_validation": {
+      "passed": true,
+      "message": "Schema valid",
+      "details": {
+        "issues": []
+      }
+    },
+    "shap_consistency": {
+      "passed": true,
+      "message": "SHAP grounding verified",
+      "details": {
+        "top_shap_features": [
+          "addr1",
+          "m6",
+          "transactionamt",
+          "tx_hour",
+          "v70",
+          "v91"
+        ],
+        "features_cited_in_narrative": [
+          "tx_hour",
+          "v70",
+          "transactionamt"
+        ],
+        "potentially_hallucinated_features": [],
+        "shap_sourced_in_evidence": true
+      }
+    },
+    "pii_leakage": {
+      "passed": true,
+      "message": "No PII patterns detected",
+      "details": {
+        "findings": []
+      }
+    },
+    "action_consistency": {
+      "passed": true,
+      "message": "Action consistency verified",
+      "details": {
+        "hard_violations": [],
+        "warnings": [],
+        "action": "auto_approve",
+        "risk": "low",
+        "n_reason_codes": 0
+      }
+    }
+  },
+  "tool_call_log": [
+    {
+      "iteration": 1,
+      "tool": "get_transaction_details",
+      "input": {
+        "transaction_id": 3519506
+      },
+      "output": {
+        "TransactionID": "3519506",
+        "TransactionAmt": 35.95,
+        "TransactionDT": "14038312",
+        "ProductCD": "W",
+        "card1": "4944",
+        "card4": "mastercard",
+        "card6": "debit",
+        "P_emaildomain": "gmail.com",
+        "R_emaildomain": null,
+        "addr1": 143.0,
+        "addr2": 87.0,
+        "dist1": 22.0,
+        "tx_hour": 11.5311,
+        "tx_dayofweek": "1",
+        "M1": "T",
+        "M4": null,
+        "M5": null,
+        "M6": "T",
+        "fraud_score": 0.0379
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_shap_explanation",
+      "input": {
+        "transaction_id": 3519506
+      },
+      "output": {
+        "transaction_id": 3519506,
+        "top_shap_features": [
+          {
+            "rank": 1,
+            "feature": "V70",
+            "feature_value": 1.0,
+            "shap_value": -0.28271,
+            "direction": "decreases_risk",
+            "reason_code": "R12",
+            "reason_text": "Aggregate risk score across behavioral dimensions elevated"
+          },
+          {
+            "rank": 2,
+            "feature": "TransactionAmt",
+            "feature_value": 35.95,
+            "shap_value": -0.25753,
+            "direction": "decreases_risk",
+            "reason_code": "R01",
+            "reason_text": "Unusual transaction amount relative to account history"
+          },
+          {
+            "rank": 3,
+            "feature": "V91",
+            "feature_value": 1.0,
+            "shap_value": -0.16298,
+            "direction": "decreases_risk",
+            "reason_code": "R12",
+            "reason_text": "Aggregate risk score across behavioral dimensions elevated"
+          },
+          {
+            "rank": 4,
+            "feature": "tx_hour",
+            "feature_value": 11.53111111111111,
+            "shap_value": 0.15726,
+            "direction": "increases_risk",
+            "reason_code": "R07",
+            "reason_text": "Time-of-day or day-of-week anomaly for this account"
+          },
+          {
+            "rank": 5,
+            "feature": "addr1",
+            "feature_value": 143.0,
+            "shap_value": -0.15605,
+            "direction": "decreases_risk",
+            "reason_code": "R08",
+            "reason_text": "Billing or shipping address information inconsistency"
+          },
+          {
+            "rank": 6,
+            "feature": "M6",
+            "feature_value": 1.0,
+            "shap_value": -0.15412,
+            "direction": "decreases_risk",
+            "reason_code": "R08",
+            "reason_text": "Billing or shipping address information inconsistency"
+          }
+        ],
+        "note": "shap_value > 0 increases fraud probability; shap_value < 0 decreases it. Values are in log-odds space."
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_customer_history",
+      "input": {
+        "card_id": 4944
+      },
+      "output": {
+        "card_id": 4944,
+        "lookback_days": 30,
+        "n_transactions_in_window": 5,
+        "total_amount": 251.75,
+        "mean_amount": 50.35,
+        "max_amount": 107.95,
+        "min_amount": 35.95,
+        "unique_products": [
+          "W"
+        ],
+        "unique_email_domains": [
+          "gmail.com"
+        ],
+        "hours_active": [
+          11,
+          12,
+          13,
+          18
+        ]
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_reason_codes",
+      "input": {
+        "transaction_id": 3519506
+      },
+      "output": {
+        "transaction_id": 3519506,
+        "adverse_action_codes": [
+          {
+            "code": "R07",
+            "description": "Time-of-day or day-of-week anomaly for this account",
+            "driven_by_feature": "tx_hour"
+          }
+        ],
+        "note": "Codes reflect features that increase fraud probability (positive SHAP only)."
+      }
+    }
+  ],
+  "iterations_used": 3,
+  "error": null
+}

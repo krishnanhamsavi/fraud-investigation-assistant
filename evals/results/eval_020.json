@@ -1,0 +1,293 @@
+{
+  "eval_id": "eval_020",
+  "transaction_id": 3541493,
+  "output": {
+    "transaction_id": 3541493,
+    "risk_assessment": "medium",
+    "recommended_action": "escalate",
+    "priority_score": 5,
+    "sar_narrative": "Transaction 3541493, retrieved via get_transaction_details, shows a $77.00 debit Mastercard purchase (ProductCD: W) with a fraud model score of 0.4538, placing it in the medium-risk tier. The get_shap_explanation tool identifies uid_card1_email (SHAP: +0.6608, value: null) and V294 (SHAP: +0.4261, value: 2.0) as the top risk-increasing features, with a null uid_card1_email value suggesting the card-to-email linkage could not be established, which the model associates with elevated risk. Cross-referencing get_customer_history for card1=6530 over 30 days shows 241 prior transactions exclusively using product W, but the purchaser email domain 'verizon.net' does not appear among the five known domains on record (gmail.com, yahoo.com, icloud.com, aol.com, ymail.com), indicating a potentially novel email domain for this card. Four SHAP features (card5, card6, M3, C11) decrease risk, creating a mixed evidence picture that warrants human analyst review before any action is taken.",
+    "adverse_action_reason_codes": [
+      "R09",
+      "R12"
+    ],
+    "supporting_evidence": [
+      {
+        "claim": "The model assigned a fraud score of 0.4538, placing the transaction in the medium-risk band.",
+        "source": "get_transaction_details",
+        "value": "fraud_score: 0.4538"
+      },
+      {
+        "claim": "The transaction amount of $77.00 is below the card's 30-day mean transaction amount of $123.25, so amount alone is not anomalous.",
+        "source": "get_customer_history",
+        "value": "mean_amount: 123.25, TransactionAmt: 77.0"
+      },
+      {
+        "claim": "The top risk-increasing SHAP feature, uid_card1_email, has a null value and a SHAP contribution of +0.6608, indicating the card-email linkage is unknown to the model.",
+        "source": "get_shap_explanation",
+        "value": "rank 1: uid_card1_email, feature_value: null, shap_value: 0.6608, direction: increases_risk"
+      },
+      {
+        "claim": "The second risk-increasing SHAP feature, V294, has a value of 2.0 and contributes +0.4261 toward elevated fraud probability.",
+        "source": "get_shap_explanation",
+        "value": "rank 2: V294, feature_value: 2.0, shap_value: 0.42608, direction: increases_risk"
+      },
+      {
+        "claim": "Four SHAP features (card5, card6, M3, C11) decrease the fraud probability, creating a mixed risk signal.",
+        "source": "get_shap_explanation",
+        "value": "card5 shap: -0.31736, card6 shap: -0.28369, M3 shap: -0.1389, C11 shap: -0.12656 (all direction: decreases_risk)"
+      },
+      {
+        "claim": "The purchaser email domain 'verizon.net' does not appear in the card's 30-day history of known email domains, representing a novel domain for this card.",
+        "source": "get_customer_history",
+        "value": "unique_email_domains: [gmail.com, yahoo.com, icloud.com, aol.com, ymail.com]; P_emaildomain from transaction: verizon.net"
+      },
+      {
+        "claim": "The card shows very high transaction velocity \u2014 241 transactions totaling $29,702.67 in the prior 30 days \u2014 which may itself be a behavioral pattern worth analyst review.",
+        "source": "get_customer_history",
+        "value": "n_transactions_in_window: 241, total_amount: 29702.67"
+      },
+      {
+        "claim": "The product code W is consistent with the card's exclusive 30-day purchase history, representing no product-type anomaly.",
+        "source": "get_customer_history",
+        "value": "unique_products: [W]"
+      },
+      {
+        "claim": "ECOA adverse action code R09 is driven by the uid_card1_email feature, citing card type or issuer profile associated with elevated risk.",
+        "source": "get_reason_codes",
+        "value": "code: R09, description: Card type or issuer profile associated with elevated risk, driven_by_feature: uid_card1_email"
+      },
+      {
+        "claim": "ECOA adverse action code R12 is driven by the V294 feature, citing aggregate risk score across behavioral dimensions elevated.",
+        "source": "get_reason_codes",
+        "value": "code: R12, description: Aggregate risk score across behavioral dimensions elevated, driven_by_feature: V294"
+      }
+    ]
+  },
+  "guardrails": {
+    "schema_validation": {
+      "passed": true,
+      "message": "Schema valid",
+      "details": {
+        "issues": []
+      }
+    },
+    "shap_consistency": {
+      "passed": true,
+      "message": "SHAP grounding verified",
+      "details": {
+        "top_shap_features": [
+          "c11",
+          "card5",
+          "card6",
+          "m3",
+          "uid_card1_email",
+          "v294"
+        ],
+        "features_cited_in_narrative": [
+          "card5",
+          "v294",
+          "m3",
+          "uid_card1_email",
+          "card6",
+          "c11"
+        ],
+        "potentially_hallucinated_features": [],
+        "shap_sourced_in_evidence": true
+      }
+    },
+    "pii_leakage": {
+      "passed": true,
+      "message": "No PII patterns detected",
+      "details": {
+        "findings": []
+      }
+    },
+    "action_consistency": {
+      "passed": true,
+      "message": "Action consistency verified",
+      "details": {
+        "hard_violations": [],
+        "warnings": [],
+        "action": "escalate",
+        "risk": "medium",
+        "n_reason_codes": 2
+      }
+    }
+  },
+  "tool_call_log": [
+    {
+      "iteration": 1,
+      "tool": "get_transaction_details",
+      "input": {
+        "transaction_id": 3541493
+      },
+      "output": {
+        "TransactionID": "3541493",
+        "TransactionAmt": 77.0,
+        "TransactionDT": "14662873",
+        "ProductCD": "W",
+        "card1": "6530",
+        "card4": "mastercard",
+        "card6": "debit",
+        "P_emaildomain": "verizon.net",
+        "R_emaildomain": null,
+        "addr1": 325.0,
+        "addr2": 87.0,
+        "dist1": null,
+        "tx_hour": 17.0203,
+        "tx_dayofweek": "1",
+        "M1": "T",
+        "M4": "M1",
+        "M5": "T",
+        "M6": "T",
+        "fraud_score": 0.4538
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_shap_explanation",
+      "input": {
+        "transaction_id": 3541493
+      },
+      "output": {
+        "transaction_id": 3541493,
+        "top_shap_features": [
+          {
+            "rank": 1,
+            "feature": "uid_card1_email",
+            "feature_value": null,
+            "shap_value": 0.6608,
+            "direction": "increases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          },
+          {
+            "rank": 2,
+            "feature": "V294",
+            "feature_value": 2.0,
+            "shap_value": 0.42608,
+            "direction": "increases_risk",
+            "reason_code": "R12",
+            "reason_text": "Aggregate risk score across behavioral dimensions elevated"
+          },
+          {
+            "rank": 3,
+            "feature": "card5",
+            "feature_value": 126.0,
+            "shap_value": -0.31736,
+            "direction": "decreases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          },
+          {
+            "rank": 4,
+            "feature": "card6",
+            "feature_value": 2.0,
+            "shap_value": -0.28369,
+            "direction": "decreases_risk",
+            "reason_code": "R09",
+            "reason_text": "Card type or issuer profile associated with elevated risk"
+          },
+          {
+            "rank": 5,
+            "feature": "M3",
+            "feature_value": 1.0,
+            "shap_value": -0.1389,
+            "direction": "decreases_risk",
+            "reason_code": "R08",
+            "reason_text": "Billing or shipping address information inconsistency"
+          },
+          {
+            "rank": 6,
+            "feature": "C11",
+            "feature_value": 1.0,
+            "shap_value": -0.12656,
+            "direction": "decreases_risk",
+            "reason_code": "R02",
+            "reason_text": "High transaction velocity or frequency on this card"
+          }
+        ],
+        "note": "shap_value > 0 increases fraud probability; shap_value < 0 decreases it. Values are in log-odds space."
+      }
+    },
+    {
+      "iteration": 2,
+      "tool": "get_customer_history",
+      "input": {
+        "card_id": 6530
+      },
+      "output": {
+        "card_id": 6530,
+        "lookback_days": 30,
+        "n_transactions_in_window": 241,
+        "total_amount": 29702.67,
+        "mean_amount": 123.25,
+        "max_amount": 2183.16,
+        "min_amount": 10.99,
+        "unique_products": [
+          "W"
+        ],
+        "unique_email_domains": [
+          "gmail.com",
+          "yahoo.com",
+          "icloud.com",
+          "aol.com",
+          "ymail.com"
+        ],
+        "hours_active": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24
+        ]
+      }
+    },
+    {
+      "iteration": 3,
+      "tool": "get_reason_codes",
+      "input": {
+        "transaction_id": 3541493
+      },
+      "output": {
+        "transaction_id": 3541493,
+        "adverse_action_codes": [
+          {
+            "code": "R09",
+            "description": "Card type or issuer profile associated with elevated risk",
+            "driven_by_feature": "uid_card1_email"
+          },
+          {
+            "code": "R12",
+            "description": "Aggregate risk score across behavioral dimensions elevated",
+            "driven_by_feature": "V294"
+          }
+        ],
+        "note": "Codes reflect features that increase fraud probability (positive SHAP only)."
+      }
+    }
+  ],
+  "iterations_used": 4,
+  "error": null
+}

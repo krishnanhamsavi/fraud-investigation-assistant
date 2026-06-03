@@ -181,6 +181,14 @@ html, body, [class*="css"] { font-family: -apple-system, BlinkMacSystemFont,
 EVAL_SET_PATH = Path("evals/agent_eval_set.jsonl")
 EVAL_CACHE_DIR = Path("evals/results")
 RESULTS_DIR = Path("docs/results")
+PROCESSED_DIR = Path("data/processed")
+
+# Demo mode: when the full processed dataset and model are not present (e.g. on
+# Streamlit Cloud, where the multi-hundred-MB parquets cannot be hosted), the app
+# renders entirely from the pre-computed cached eval results. Every cached result
+# embeds the full tool outputs (transaction details, SHAP, history, reason codes),
+# so all 30 cases display fully without the model or raw data.
+DEMO_MODE = not (PROCESSED_DIR / "val.parquet").exists()
 
 RISK_COLORS = {"high": "#c0392b", "medium": "#b7770d", "low": "#196f3d"}
 ACTION_LABELS = {
@@ -233,6 +241,20 @@ def load_cached_result(eval_id: str) -> dict | None:
     if p.exists():
         return json.loads(p.read_text())
     return None
+
+
+def extract_tool_output(cached_result: dict | None, tool_name: str) -> dict:
+    """Pull a tool's recorded output from a cached eval result's tool_call_log.
+
+    Used in DEMO_MODE so the app can render transaction details, SHAP, history,
+    and reason codes without loading the model or processed data.
+    """
+    if not cached_result:
+        return {}
+    for entry in cached_result.get("tool_call_log", []):
+        if entry.get("tool") == tool_name:
+            return entry.get("output") or {}
+    return {}
 
 
 def estimate_what_if_impact(base_txn: dict, modifications: dict) -> tuple[float, str]:
@@ -598,17 +620,22 @@ with st.sidebar:
 # ── Load data for selected case ────────────────────────────────────────────
 
 txn_id = selected_case["transaction_id"]
-ctx = load_context()  # triggers model load (cached after first call)
 
-with st.spinner("Loading transaction data…"):
-    txn = fetch_txn_details(txn_id)
-    shap_data = fetch_shap(txn_id)
-
-card_id = txn.get("card1")
-history = fetch_history(int(card_id)) if card_id else {}
-
-# Load cached agent result
+# Load cached agent result first — in demo mode it is the sole data source.
 cached_result = load_cached_result(selected_case["eval_id"])
+
+if DEMO_MODE:
+    # Render entirely from the cached eval result (no model / parquets needed).
+    txn = extract_tool_output(cached_result, "get_transaction_details")
+    shap_data = extract_tool_output(cached_result, "get_shap_explanation")
+    history = extract_tool_output(cached_result, "get_customer_history")
+else:
+    ctx = load_context()  # triggers model load (cached after first call)
+    with st.spinner("Loading transaction data…"):
+        txn = fetch_txn_details(txn_id)
+        shap_data = fetch_shap(txn_id)
+    card_id = txn.get("card1")
+    history = fetch_history(int(card_id)) if card_id else {}
 
 
 # ── Intro & Help ───────────────────────────────────────────────────────────
@@ -746,7 +773,8 @@ with col_left:
     st.markdown('</div>', unsafe_allow_html=True)
 
     # ── What If Mode ───────────────────────────────────────────────────────
-    with st.expander("What If — Modify & Recalculate", expanded=False):
+    if not DEMO_MODE:
+      with st.expander("What If — Modify & Recalculate", expanded=False):
         st.markdown('<div style="font-size:12px; color:#555; margin-bottom:12px;">Adjust transaction details below to see how the fraud score would change.</div>', unsafe_allow_html=True)
 
         col_w1, col_w2 = st.columns(2)
@@ -897,15 +925,19 @@ with col_right:
     else:
         st.markdown('<div style="font-size:13px; color:#6c757d; padding:8px 0;">No cached investigation for this case.</div>', unsafe_allow_html=True)
 
-    from dotenv import load_dotenv
-    load_dotenv()
-    has_key = bool(os.getenv("ANTHROPIC_API_KEY"))
+    if DEMO_MODE:
+        st.markdown('<div style="font-size:11px; color:#9ca3af; margin-top:6px;">Live re-runs are disabled in the hosted demo. Results shown are pre-computed by the offline eval suite (<code>evals/run_evals.py</code>). Clone the repo and add an API key to run live.</div>', unsafe_allow_html=True)
+        run_live = False
+    else:
+        from dotenv import load_dotenv
+        load_dotenv()
+        has_key = bool(os.getenv("ANTHROPIC_API_KEY"))
 
-    run_live = st.button(
-        "Run Live Investigation" if not agent_output else "Re-run Live Investigation",
-        disabled=not has_key,
-        help="Requires ANTHROPIC_API_KEY in .env" if not has_key else None,
-    )
+        run_live = st.button(
+            "Run Live Investigation" if not agent_output else "Re-run Live Investigation",
+            disabled=not has_key,
+            help="Requires ANTHROPIC_API_KEY in .env" if not has_key else None,
+        )
 
     if run_live:
         from src.agent.investigator import investigate
@@ -968,7 +1000,17 @@ with col_right:
         # ── Reason codes ─────────────────────────────────────────────────────
         if codes:
             st.markdown('<div class="card"><div class="card-title">Adverse Action Reason Codes</div>', unsafe_allow_html=True)
-            from src.explain.shap_utils import REASON_CODES
+            # Prefer descriptions embedded in the cached reason_codes tool output
+            # (keeps the hosted demo free of heavy imports); fall back to the source map.
+            REASON_CODES = {
+                c.get("code"): c.get("description", "")
+                for c in extract_tool_output(cached_result, "get_reason_codes").get("adverse_action_codes", [])
+            }
+            if not REASON_CODES:
+                try:
+                    from src.explain.shap_utils import REASON_CODES
+                except Exception:
+                    REASON_CODES = {}
             pills = ""
             for code in codes:
                 desc = REASON_CODES.get(code, "")
