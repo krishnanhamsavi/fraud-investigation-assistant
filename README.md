@@ -84,7 +84,14 @@ This system investigates suspicious transactions by:
 
 ---
 
+## Live Demo
 
+**[fraud-investigation-assistant.streamlit.app](https://fraud-investigation-assistant-j4fpvpfna4yyh94ujxkccg.streamlit.app)**
+
+The hosted demo runs in a self-contained mode: it renders 30 real investigation
+cases from pre-computed eval results (transaction details, SHAP explanations,
+the agent's narrative, and guardrail outcomes). The full pipeline — model
+training, live SHAP, and live agent runs — executes locally (see Quick Start).
 
 ---
 
@@ -94,8 +101,8 @@ This system investigates suspicious transactions by:
 
 1. **Clone & install**
    ```bash
-   git clone <repo>
-   cd fraud-agent-mrm
+   git clone https://github.com/krishnanhamsavi/fraud-investigation-assistant.git
+   cd fraud-investigation-assistant
    pip install -r requirements.txt
    ```
 
@@ -208,6 +215,7 @@ fraud-agent-mrm/
 - **[Fairness Analysis](docs/03_fairness_analysis.md)** — Disparate impact audit, proxy variables
 - **[Monitoring Plan](docs/04_monitoring_plan.md)** — PSI thresholds, retraining triggers
 - **[LLM Governance](docs/05_llm_governance.md)** — SR 11-7 extended to GenAI, guardrails framework
+- **[SR 11-7 Overview](docs/06_sr_11_7_overview.md)** — model risk management framework applied to this project
 - **[Reason Codes](docs/07_reason_codes.md)** — ECOA R01–R15 mappings
 
 ---
@@ -222,21 +230,27 @@ fraud-agent-mrm/
 
 ---
 
+## For Portfolio / Interview
 
+**One-line pitch:** An end-to-end fraud investigation system that pairs an
+explainable ML model with a governed AI agent — designed the way a bank's
+model-risk function would actually require: auditable, fair, monitored, and
+human-in-the-loop.
 
-**Live demo:** [Deployed link here]
+**What it demonstrates:**
+- Full ML system ownership (data → model → explanation → monitoring → UI → deploy)
+- Financial-services governance fluency (SR 11-7, ECOA reason codes, fairness, drift)
+- Responsible GenAI integration (tool-use agent + guardrail layer + measured eval suite)
+- Communication to multiple audiences (plain-English, SHAP, regulatory docs)
 
----
-
+> Note: this is a portfolio demonstration on a public dataset — illustrative
+> governance and a 30-case eval, not a production deployment.
 
 ---
 
 ## Author
 
-Built to demonstrate:
-- Full ML pipeline (data → model → explanation → deployment)
-- GenAI governance & safety practices
-- Production-grade code quality
-- User-centered design for complex ML systems
+**Hamsavi Krishnan** — [GitHub](https://github.com/krishnanhamsavi)
 
-**Questions?** Check the docs or reach out.
+Built to demonstrate full-stack ML engineering, GenAI governance, and
+model-risk-management practices for Fraud Analytics / MRM roles.
