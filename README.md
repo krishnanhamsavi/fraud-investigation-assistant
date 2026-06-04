@@ -230,23 +230,7 @@ fraud-agent-mrm/
 
 ---
 
-## For Portfolio / Interview
 
-**One-line pitch:** An end-to-end fraud investigation system that pairs an
-explainable ML model with a governed AI agent — designed the way a bank's
-model-risk function would actually require: auditable, fair, monitored, and
-human-in-the-loop.
-
-**What it demonstrates:**
-- Full ML system ownership (data → model → explanation → monitoring → UI → deploy)
-- Financial-services governance fluency (SR 11-7, ECOA reason codes, fairness, drift)
-- Responsible GenAI integration (tool-use agent + guardrail layer + measured eval suite)
-- Communication to multiple audiences (plain-English, SHAP, regulatory docs)
-
-> Note: this is a portfolio demonstration on a public dataset — illustrative
-> governance and a 30-case eval, not a production deployment.
-
----
 
 ## Author
 
