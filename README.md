@@ -2,7 +2,7 @@
 
 A production-grade fraud detection system combining **XGBoost machine learning, SHAP explanations, and Claude AI reasoning** with automated safety guardrails. Built to demonstrate SR 11-7 compliance, GenAI governance, and human-in-the-loop fraud analytics.
 
-**[Try the Live Demo](#deployment)** | **[Key Results](#results)** | **[Architecture](#architecture)**
+**[▶ Try the Live Demo](https://fraud-investigation-assistant-j4fpvpfna4yyh94ujxkccg.streamlit.app)** &nbsp;|&nbsp; **[Key Results](#key-results)** &nbsp;|&nbsp; **[Architecture](#architecture-7-phases)**
 
 ---
 
