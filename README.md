@@ -125,7 +125,7 @@ Stating these limits is part of the point: knowing what a model *can't* claim is
 
 ## Author
 
-**Hamsavahini Krishnan** — Data analyst working at the intersection of risk, analytics, and AI governance.
+**Hamsavi Krishnan** — Data analyst working at the intersection of risk, analytics, and AI governance.
 
 [LinkedIn](https://www.linkedin.com/in/krishnanhamsavi) · [GitHub](https://github.com/krishnanhamsavi)
 
