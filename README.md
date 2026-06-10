@@ -1,240 +1,132 @@
-# Fraud Investigation Assistant — AI-Powered Decision Support System
+# Fraud Investigation Assistant
 
-A production-grade fraud detection system combining **XGBoost machine learning, SHAP explanations, and Claude AI reasoning** with automated safety guardrails. Built to demonstrate SR 11-7 compliance, GenAI governance, and human-in-the-loop fraud analytics.
+**An AI-assisted decision support system for fraud analysts — built with the governance layer most GenAI demos skip.**
 
-**[▶ Try the Live Demo](https://fraud-investigation-assistant-j4fpvpfna4yyh94ujxkccg.streamlit.app)** &nbsp;|&nbsp; **[Key Results](#key-results)** &nbsp;|&nbsp; **[Architecture](#architecture-7-phases)**
-
----
-
-## Overview
-
-This system investigates suspicious transactions by:
-1. **Model flags** — XGBoost predicts fraud probability (ROC-AUC: 0.9126)
-2. **SHAP explains** — Which transaction features drove the score
-3. **AI reasons** — Claude synthesizes evidence into a structured investigation
-4. **Guardrails validate** — 4 automated checks ensure no hallucinations or PII leaks
-5. **Analyst decides** — Humans make final approval/decline call
-
-**Why this matters:** Traditional fraud models are black boxes. GenAI can reason about evidence but hallucinates. This system combines both: precise model signals + AI reasoning + automated safety checks.
+[**Live Demo**](https://fraud-investigation-assistant-j4fpvpfna4yyh94ujxkccg.streamlit.app/) · [Key Results](#key-results) · [Architecture](#architecture) · [Governance & Documentation](#governance--documentation)
 
 ---
+
+## The Problem
+
+Fraud models are hard to act on: a score of 0.87 tells an analyst nothing about *why* a transaction looks suspicious. Large language models can reason about evidence and write clear narratives — but they hallucinate, and in a regulated risk environment an ungrounded explanation is worse than none.
+
+This project explores how to combine the two safely:
+
+> **Precise model signals + grounded AI reasoning + automated safety checks + a human making the final call.**
+
+## How It Works
+
+```
+Transaction ──► XGBoost scores it ──► SHAP explains it ──► Claude investigates it
+                                                                    │
+                                              4 guardrails validate the output
+                                                                    │
+                                              Analyst reviews and decides
+```
+
+1. **Model flags** — XGBoost predicts fraud probability on IEEE-CIS data (590k transactions)
+2. **SHAP explains** — Per-transaction feature attributions, mapped to 15 ECOA-style reason codes (R01–R15)
+3. **AI investigates** — A Claude agent pulls transaction details, SHAP evidence, and customer history through a tool-use loop, then produces a structured investigation (risk level, recommended action, narrative)
+4. **Guardrails validate** — Schema validation, SHAP consistency, PII leakage detection, action logic checks
+5. **Analyst decides** — The system recommends; it never auto-declines. Human-in-the-loop by design.
 
 ## Key Results
 
-| Metric | Value | What it means |
-|--------|-------|---------------|
-| **ROC-AUC** | 0.9126 | Model separates fraud/legit well |
-| **PR-AUC** | 0.5291 | Handles class imbalance (3.5% fraud) |
-| **FDR @ 3%** | 47.83% | Catches ~48% of fraud at 3% review rate |
-| **Guardrail pass rate** | 97% | AI output is valid & safe |
-| **Cohen's kappa** | 0.851 | Substantial agreement on actions |
-| **Priority gap** | +4.67 | Fraud prioritized 4.67pts higher than legit |
+| Metric | Value | Why it matters |
+| --- | --- | --- |
+| ROC-AUC | 0.9126 | Strong fraud/legit separation |
+| FDR @ 3% review rate | 47.8% | Catches nearly half of fraud while reviewing only 3% of transactions |
+| Guardrail pass rate | 97% | AI output is structurally valid, grounded, and PII-safe |
+| Cohen's kappa vs. labels | 0.851 | Substantial agreement between agent recommendations and curated ground truth |
+| Score PSI | 0.00093 | Stable score distribution across the monitoring window |
 
----
+Evaluated against a 30-case suite spanning fraud, legitimate, ambiguous, and adversarial scenarios. Full methodology in [`evals/`](evals/) and [`docs/`](docs/).
 
-## Architecture: 7 Phases
+## Architecture
 
-### Phase 0: Scaffolding
-- Project structure, environment, data paths
+The project is organized as a seven-phase pipeline, mirroring how a model risk team would actually stand up a system like this:
 
-### Phase 1: Data Pipeline
-- Load IEEE-CIS fraud dataset (590k transactions)
-- Feature engineering (log amounts, time-of-day, composite features)
-- Time-based train/val split (no temporal leakage)
-- OrdinalEncoder for categoricals
-- **Output:** 472k train, 118k val samples
+| Phase | What it does | Highlights |
+| --- | --- | --- |
+| 1. Data pipeline | Load, engineer features, split | Time-based train/val split to prevent temporal leakage (472k / 118k) |
+| 2. Champion model | XGBoost + SHAP | `scale_pos_weight` for 3.5% class imbalance, TreeExplainer attributions |
+| 3. Challenger benchmarking | Compare alternatives | Logistic Regression (0.8375 AUC) and LightGBM (0.8306) vs. champion |
+| 4. Monitoring & fairness | Drift and disparate impact | PSI, KS-tests, 4/5ths-rule audit on proxy variables |
+| 5. LLM agent | Claude tool-use loop | Structured JSON output, grounded in model evidence, 6-iteration cap |
+| 6. Eval suite | Test the agent like a model | 30 curated cases, 4 automated guardrails, adversarial inputs |
+| 7. Streamlit UI | Analyst-facing dashboard | Transaction picker, SHAP panel, AI investigation, What-If mode |
 
-### Phase 2: Champion Model + SHAP
-- XGBoost with `scale_pos_weight` for imbalance
-- Early stopping on validation AUC
-- SHAP TreeExplainer for per-transaction explanations
-- 15 ECOA reason codes (R01–R15) mapped from SHAP features
-- **Output:** ROC-AUC 0.9126, PR-AUC 0.5291
+## Governance & Documentation
 
-### Phase 3: Challenger Benchmarking
-- Logistic Regression (baseline): 0.8375 AUC
-- LightGBM (high cardinality): 0.8306 AUC
-- Champion selected on accuracy + latency trade-off
+The differentiating layer of this project. SR 11-7 model risk principles are extended to cover the GenAI component:
 
-### Phase 4: Monitoring & Fairness
-- Population Stability Index (PSI) for score drift
-- KS-test for distribution shifts
-- Disparate impact analysis using 4/5ths rule
-- Proxy variables (ProductCD, card type) for fairness audit
-- **Output:** Score PSI 0.00093 (stable), no severe DI violations
-
-### Phase 5: LLM Agent (Claude)
-- Tool-use loop: transaction details → SHAP → customer history → reason codes
-- Structured JSON output with risk/action/narrative
-- 6-iteration max with proper JSON extraction
-- **Output:** Agent narratives grounded in tools, no hallucination
-
-### Phase 6: Agent Eval Suite
-- 30 hand-curated cases (fraud/legit/ambiguous/adversarial)
-- 4 guardrails: schema validation, SHAP consistency, PII leakage, action logic
-- Metrics: 90% exact match, 0.851 kappa, 97% all-guardrails pass
-
-### Phase 7: Streamlit UI
-- Professional dashboard with dark sidebar, warm color palette
-- Transaction picker with advanced search/filtering
-- Left panel: details + SHAP + customer history
-- Right panel: AI investigation + guardrail results
-- Plain English summaries + What If mode (estimate impact of changes)
-- User-friendly guidance throughout
-
----
-
-## Live Demo
-
-**[fraud-investigation-assistant.streamlit.app](https://fraud-investigation-assistant-j4fpvpfna4yyh94ujxkccg.streamlit.app)**
-
-The hosted demo runs in a self-contained mode: it renders 30 real investigation
-cases from pre-computed eval results (transaction details, SHAP explanations,
-the agent's narrative, and guardrail outcomes). The full pipeline — model
-training, live SHAP, and live agent runs — executes locally (see Quick Start).
-
----
+- [**Model Documentation**](docs/01_model_documentation.md) — architecture, hyperparameters, validation approach
+- [**Challenger Analysis**](docs/02_challenger_analysis.md) — champion selection rationale
+- [**Fairness Analysis**](docs/03_fairness_analysis.md) — disparate impact audit, proxy variable discussion
+- [**Monitoring Plan**](docs/04_monitoring_plan.md) — PSI thresholds, retraining triggers
+- [**LLM Governance**](docs/05_llm_governance.md) — guardrail framework, applying SR 11-7 to GenAI
+- [**Reason Codes**](docs/07_reason_codes.md) — ECOA R01–R15 mappings from SHAP features
 
 ## Quick Start
 
-### Local Setup
+```bash
+# 1. Clone and install
+git clone https://github.com/krishnanhamsavi/fraud-investigation-assistant.git
+cd fraud-investigation-assistant
+pip install -r requirements.txt
 
-1. **Clone & install**
-   ```bash
-   git clone https://github.com/krishnanhamsavi/fraud-investigation-assistant.git
-   cd fraud-investigation-assistant
-   pip install -r requirements.txt
-   ```
+# 2. Configure
+echo "ANTHROPIC_API_KEY=sk-..." >> .env
 
-2. **Set environment variables**
-   ```bash
-   # Create .env file
-   echo "ANTHROPIC_API_KEY=sk-..." >> .env
-   ```
+# 3. Add data
+# Download train_transaction.csv and train_identity.csv from the
+# IEEE-CIS Kaggle competition and place them in data/raw/
 
-3. **Download data** (from IEEE-CIS Kaggle competition)
-   ```bash
-   # Place train_transaction.csv and train_identity.csv in data/raw/
-   # Or update src/data/load.py with your data path
-   ```
-
-4. **Run the pipeline (optional)**
-   ```bash
-   # Phase 1: Data preprocessing
-   python scripts/phase1_stats.py
-   
-   # Phase 2: Train champion model + SHAP
-   python -m src.models.train
-   python scripts/phase2_shap.py
-   
-   # Phase 3: Compare challengers
-   python scripts/phase3_compare.py
-   
-   # Phase 4: Monitoring & fairness
-   python scripts/phase4_monitoring.py
-   
-   # Phase 5: LLM agent demo
-   python scripts/phase5_demo.py
-   
-   # Phase 6: Agent eval suite
-   python scripts/generate_eval_set.py
-   python evals/run_evals.py
-   ```
-
-5. **Launch the app**
-   ```bash
-   streamlit run src/app/streamlit_app.py
-   ```
-   Opens at `http://localhost:8501`
-
----
-
-## Deployment
-
-### Streamlit Cloud (Recommended)
-
-1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Phase 7: Production Streamlit UI"
-   git push origin main
-   ```
-
-2. **Deploy to Streamlit Cloud**
-   - Go to [share.streamlit.io](https://share.streamlit.io)
-   - Connect GitHub repo
-   - Set environment variable: `ANTHROPIC_API_KEY`
-   - Deploy
-
-3. **Share the link**
-   - URL: `https://share.streamlit.io/your-user/fraud-agent-mrm/main/src/app/streamlit_app.py`
-
-### Docker (Optional)
-
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 8501
-CMD ["streamlit", "run", "src/app/streamlit_app.py"]
+# 4. Launch the app
+streamlit run src/app/streamlit_app.py
 ```
 
----
+To reproduce the full pipeline (training, benchmarking, monitoring, evals), run the phase scripts in order:
+
+```bash
+python scripts/phase1_stats.py
+python -m src.models.train && python scripts/phase2_shap.py
+python scripts/phase3_compare.py
+python scripts/phase4_monitoring.py
+python scripts/phase5_demo.py
+python scripts/generate_eval_set.py && python evals/run_evals.py
+```
 
 ## Project Structure
 
 ```
-fraud-agent-mrm/
 ├── src/
-│   ├── data/           # Data loading & preprocessing
-│   ├── models/         # XGBoost champion + challengers
-│   ├── explain/        # SHAP explanations & reason codes
-│   ├── agent/          # LLM agent, tools, guardrails, prompts
-│   └── app/            # Streamlit UI
-├── scripts/            # Pipeline scripts (phase1–6)
-├── evals/              # Agent eval suite
-├── notebooks/          # EDA, analysis
-├── data/
-│   ├── raw/            # Original CSVs
-│   └── processed/      # Parquets, encoders
-├── docs/               # Model documentation, fairness analysis, monitoring plan
-├── tests/              # Unit tests
-├── requirements.txt    # Dependencies
-├── .env.example        # Template for environment variables
-└── README.md           # This file
+│   ├── data/        # Loading & preprocessing
+│   ├── models/      # XGBoost champion + challengers
+│   ├── explain/     # SHAP explanations & reason codes
+│   ├── agent/       # LLM agent, tools, guardrails, prompts
+│   └── app/         # Streamlit UI
+├── scripts/         # Pipeline scripts (phases 1–6)
+├── evals/           # Agent eval suite
+├── docs/            # Governance documentation
+├── notebooks/       # EDA & analysis
+└── tests/           # Unit tests
 ```
-
----
-
-## Documentation
-
-- **[Model Documentation](docs/01_model_documentation.md)** — Champion architecture, hyperparameters, validation approach
-- **[Challenger Analysis](docs/02_challenger_analysis.md)** — Why Champion was selected
-- **[Fairness Analysis](docs/03_fairness_analysis.md)** — Disparate impact audit, proxy variables
-- **[Monitoring Plan](docs/04_monitoring_plan.md)** — PSI thresholds, retraining triggers
-- **[LLM Governance](docs/05_llm_governance.md)** — SR 11-7 extended to GenAI, guardrails framework
-- **[SR 11-7 Overview](docs/06_sr_11_7_overview.md)** — model risk management framework applied to this project
-- **[Reason Codes](docs/07_reason_codes.md)** — ECOA R01–R15 mappings
-
----
 
 ## Technologies
 
-- **ML:** XGBoost, scikit-learn, pandas, numpy
-- **Explainability:** SHAP (TreeExplainer)
-- **GenAI:** Anthropic Claude (tool-use architecture)
-- **UI:** Streamlit with custom CSS
-- **Evaluation:** Cohen's kappa, confusion matrix, disparate impact ratio, PSI
+**ML:** XGBoost, scikit-learn, pandas · **Explainability:** SHAP · **GenAI:** Anthropic Claude (tool use) · **UI:** Streamlit · **Evaluation:** Cohen's kappa, PSI, disparate impact ratio
 
----
+## Scope & Limitations
 
+This is a demonstration system built on public Kaggle data, designed to show what a *governed* GenAI deployment in fraud operations would look like — not a system that has processed live traffic. The eval suite is hand-curated (30 cases) and would need substantial expansion, blind labeling, and inter-rater reliability checks before any real-world use. Fairness analysis relies on proxy variables since the dataset contains no protected-class attributes.
 
+Stating these limits is part of the point: knowing what a model *can't* claim is as important as what it can.
 
 ## Author
 
-**Hamsavi Krishnan** — [GitHub](https://github.com/krishnanhamsavi)
+**Hamsavahini Krishnan** — Data analyst working at the intersection of risk, analytics, and AI governance.
 
-Built to demonstrate full-stack ML engineering, GenAI governance, and
-model-risk-management practices for Fraud Analytics / MRM roles.
+[LinkedIn](https://www.linkedin.com/in/krishnanhamsavi) · [GitHub](https://github.com/krishnanhamsavi)
+
+Questions or feedback? Open an issue or reach out.
